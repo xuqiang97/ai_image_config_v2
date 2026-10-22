@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI生图管理员配置 · 二期原型</title>
+<style>
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+    font-size:14px;color:#1f2329;background:#f5f6f8;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  }
+  button,input,select,textarea{font:inherit}
+  button{border:none;background:none;cursor:pointer}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+
+  :root{
+    --brand:#2b5cff; --brand-hover:#1d4ae8; --brand-soft:#eaf0ff; --brand-soft-2:#f4f7ff;
+    --border:#e5e6eb; --border-2:#c9cdd4; --text-1:#1f2329; --text-2:#4e5969; --text-3:#86909c;
+    --bg:#f5f6f8; --card:#fff; --hover:#f7f8fa; --success:#00b42a; --success-soft:#e8ffea;
+    --warning:#ff7d00; --warning-soft:#fff7e8; --danger:#f53f3f; --danger-soft:#ffece8;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.04); --shadow:0 8px 24px rgba(0,0,0,.10);
+    --radius:8px; --radius-lg:12px;
+  }
+  .topbar{
+    height:56px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;
+    padding:0 20px;position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:12px;font-weight:700;color:var(--text-1)}
+  .brand-logo{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-hover));
+    display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 2px 8px rgba(43,92,255,.18);
+  }
+
+  .layout{display:flex;min-height:calc(100vh - 56px)}
+  .sidebar{
+    width:236px;background:#fff;border-right:1px solid var(--border);padding:16px 12px;flex-shrink:0;
+  }
+  .side-title{
+    padding:8px 12px 12px;font-size:11px;color:var(--text-3);font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  }
+  .side-item{
+    width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-2);
+    margin-bottom:4px;text-align:left;transition:all .16s;
+  }
+  .side-item:hover{background:var(--hover);color:var(--text-1)}
+  .side-item.active{background:var(--brand-soft);color:var(--brand);font-weight:700}
+  .side-item .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.65}
+  .side-desc{
+    padding:12px;margin-top:14px;border:1px dashed var(--border-2);border-radius:10px;background:#fafbfc;
+    font-size:12px;line-height:1.65;color:var(--text-3);
+  }
+  .side-doc-link{margin-top:10px;font-size:12px;line-height:1.6;color:var(--text-3)}
+  .side-doc-link a{color:#1d4ed8;text-decoration:underline;overflow-wrap:anywhere;word-break:break-all}
+
+  .main{flex:1;min-width:0;max-width:1440px;padding:20px 24px 40px}
+  .page-header{margin-bottom:16px}
+  .page-title{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--text-1)}
+  .page-desc{
+    margin-top:8px;display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px;
+    padding:8px 12px;border:1px solid #ffd0c9;border-left:4px solid var(--danger);
+    border-radius:8px;background:#fff7f5;color:var(--text-2);line-height:1.6;
+  }
+  .page-desc-alert{color:var(--danger);font-weight:800}
+  .page-desc-muted{color:var(--text-2)}
+  .page-note{
+    margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#fff;
+    font-size:12.5px;color:var(--text-3);line-height:1.7;
+  }
+  .page-note b{color:var(--text-2)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+  .card + .card{margin-top:16px}
+
+  .filter-bar{padding:18px 20px 8px}
+  .filter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px 16px}
+  .form-item{display:flex;flex-direction:column;gap:6px}
+  .form-item label{font-size:12.5px;color:var(--text-2);font-weight:600}
+  .req{color:var(--danger);margin-right:2px}
+  .input,.select,textarea{
+    width:100%;height:36px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-1);
+    outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  textarea{height:auto;padding:10px 11px;min-height:110px;resize:vertical}
+  .input:hover,.select:hover,textarea:hover{border-color:var(--border-2)}
+  .input:focus,.select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(43,92,255,.10)}
+  .select{
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23c9cdd4' d='M5 6 0 0h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;
+  }
+  .readonly{
+    background:#f2f3f5 !important;border-color:#d9dde4 !important;color:#6b7280 !important;cursor:not-allowed;
+  }
+  .readonly:focus{box-shadow:none !important}
+  .field-meta{font-size:12px;color:var(--text-3)}
+  .field-meta.badge{
+    display:inline-flex;align-items:center;gap:4px;background:#f2f3f5;border-radius:999px;padding:2px 8px;font-size:11px;
+  }
+  .field-error .input,.field-error .select,.field-error textarea{border-color:var(--danger) !important}
+  .field-error-msg{font-size:12px;color:var(--danger);margin-top:4px}
+
+  .filter-actions{
+    display:flex;justify-content:flex-end;gap:10px;padding:12px 20px 18px;border-top:1px dashed var(--border);margin-top:10px;
+  }
+  .action-bar{display:flex;align-items:center;gap:10px;padding:14px 0 0}
+
+  .btn{
+    height:36px;padding:0 14px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    font-size:13px;font-weight:600;transition:all .15s;white-space:nowrap;
+  }
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:hover{background:var(--brand-hover)}
+  .btn-default{background:#fff;border:1px solid var(--border);color:var(--text-2)}
+  .btn-default:hover{border-color:var(--brand);color:var(--brand)}
+  .btn-danger{background:#fff;border:1px solid var(--border);color:var(--danger)}
+  .btn-danger:hover{background:var(--danger-soft);border-color:var(--danger)}
+  .btn-text{height:auto;padding:0 6px;color:var(--brand);font-weight:600}
+  .btn-text.danger{color:var(--danger)}
+  button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+  .toolbar{
+    padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .toolbar-left{display:flex;align-items:center;gap:10px}
+  .toolbar-title{font-size:15px;font-weight:700;color:var(--text-1)}
+  .toolbar-summary{font-size:12.5px;color:var(--text-3)}
+  .toolbar-summary strong{color:var(--brand)}
+  .active-filters{padding:0 20px 12px;display:flex;flex-wrap:wrap;gap:8px}
+  .filter-chip{
+    padding:4px 10px;border-radius:999px;background:#f7f8fa;border:1px solid var(--border);font-size:12px;color:var(--text-2);
+  }
+
+  .table-wrap{overflow:auto}
+  table.tbl{width:100%;border-collapse:separate;border-spacing:0}
+  .tbl th,.tbl td{
+    padding:16px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap;
+  }
+  .tbl th{font-size:12.5px;color:var(--text-2);font-weight:700;background:#fafbfc;position:sticky;top:0;z-index:1}
+  .tbl tbody tr:hover{background:var(--brand-soft-2)}
+  .tbl .id-cell,.tbl .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--text-2)}
+  .tbl .username-cell{font-weight:600;color:var(--text-1)}
+  .json-inline{
+    min-width:240px;max-width:620px;padding:8px 10px;border-radius:6px;
+    background:#f7f8fa;border:1px solid var(--border);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--text-2);
+    white-space:normal;word-break:break-all;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;line-height:18px;
+  }
+  .badge-success{background:var(--success-soft);color:var(--success)}
+  .badge-muted{background:#f2f3f5;color:var(--text-3)}
+  .badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+  .pager{
+    padding:14px 20px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text-2);
+  }
+  .pager-controls{display:flex;align-items:center;gap:6px}
+  .pager-controls button{
+    min-width:32px;height:32px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text-2);transition:all .15s;
+  }
+  .pager-controls button:hover:not(:disabled){color:var(--brand);border-color:var(--brand)}
+  .pager-controls button.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .pager-controls button:disabled{opacity:.4;cursor:not-allowed}
+
+  .empty{padding:56px 20px;text-align:center;color:var(--text-3)}
+  .empty-title{font-size:14px;color:var(--text-2);margin-bottom:6px}
+  .empty-desc{font-size:12.5px}
+
+  .mask{
+    position:fixed;inset:0;background:rgba(0,0,0,.38);backdrop-filter:blur(2px);z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .mask.show{opacity:1;pointer-events:auto}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:620px;max-width:92vw;background:#fff;z-index:101;display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .26s cubic-bezier(.22,.61,.36,1);box-shadow:-8px 0 32px rgba(0,0,0,.12);
+  }
+  .drawer.show{transform:translateX(0)}
+  .drawer-header{
+    padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;
+  }
+  .drawer-title{font-size:16px;font-weight:700;color:var(--text-1);display:flex;align-items:center;gap:8px}
+  .drawer-title .tag{padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:600}
+  .drawer-close{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;color:var(--text-3)}
+  .drawer-close:hover{background:var(--hover);color:var(--text-1)}
+  .drawer-body{flex:1;overflow:auto;padding:20px}
+  .drawer-footer{
+    padding:12px 20px;border-top:1px solid var(--border);background:#fafbfc;display:flex;justify-content:flex-end;gap:10px;
+  }
+
+  .section{margin-bottom:20px}
+  .section-title{
+    font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border);
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-note{font-size:12px;color:var(--text-3);font-weight:500;margin-left:auto}
+  .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+  .desc-grid{display:grid;grid-template-columns:110px 1fr;gap:14px 16px}
+  .desc-grid dt{font-size:12.5px;color:var(--text-3)}
+  .desc-grid dd{font-size:13px;color:var(--text-1);word-break:break-all}
+  .readonly-tip{
+    padding:10px 12px;border-radius:8px;background:#f7f8fa;border:1px solid var(--border);font-size:12.5px;color:var(--text-3);margin-bottom:12px;
+  }
+  .warn-box{
+    padding:12px 14px;border-radius:10px;background:var(--warning-soft);border:1px solid #ffd8a8;font-size:12.5px;color:#9b5d00;line-height:1.7;
+  }
+
+  .mode-switch{display:inline-flex;background:#f2f3f5;border-radius:8px;padding:3px;gap:3px}
+  .mode-switch button{
+    min-width:108px;height:30px;padding:0 12px;border-radius:6px;font-size:12.5px;color:var(--text-2);font-weight:600;
+  }
+  .mode-switch button.active{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .quota-panel{margin-top:12px}
+  .quota-editor{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .quota-row{display:grid;grid-template-columns:1fr 160px 44px;border-bottom:1px solid var(--border)}
+  .quota-row:last-child{border-bottom:none}
+  .quota-row.header{background:#fafbfc}
+  .quota-row.header > div{padding:10px 12px;font-size:12px;color:var(--text-3);font-weight:700}
+  .quota-row input{border:none;border-right:1px solid var(--border);outline:none;padding:10px 12px}
+  .quota-row input:last-of-type{border-right:none}
+  .quota-row input:focus{background:var(--brand-soft-2)}
+  .quota-del{
+    display:grid;place-items:center;color:var(--text-3);transition:all .12s;
+  }
+  .quota-del:hover{background:var(--danger-soft);color:var(--danger)}
+  .quota-add{padding:10px 12px;background:#fafbfc;border-top:1px solid var(--border)}
+  .quota-add .btn-text{padding:0}
+  .quota-json{min-height:180px}
+  .hint{font-size:12px;color:var(--text-3);line-height:1.6;margin-top:8px}
+  .code-block{
+    background:#1f2329;color:#d4d4d4;border-radius:10px;padding:14px;white-space:pre-wrap;word-break:break-all;line-height:1.7;font-size:12.5px;
+  }
+  .toast-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .toast{
+    min-width:260px;background:#fff;border:1px solid var(--border);border-left:3px solid var(--brand);border-radius:8px;
+    box-shadow:var(--shadow);padding:10px 14px;font-size:13px;color:var(--text-1);animation:toastIn .24s;
+  }
+  .toast.success{border-left-color:var(--success)}
+  .toast.error{border-left-color:var(--danger)}
+  @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+  .switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+  .switch input{position:absolute;opacity:0;pointer-events:none}
+  .switch .track{width:40px;height:22px;border-radius:11px;background:#c9cdd4;position:relative;transition:background .18s}
+  .switch .track::after{
+    content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;
+    transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.2)
+  }
+  .switch input:checked + .track{background:var(--brand)}
+  .switch input:checked + .track::after{transform:translateX(18px)}
+  .switch .label{font-size:13px;color:var(--text-2)}
+
+  .modal{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:420px;max-width:92vw;background:#fff;border-radius:12px;z-index:102;
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:var(--shadow);
+  }
+  .modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+  .modal-body{padding:22px 22px 12px}
+  .modal-title{font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:10px}
+  .modal-desc{font-size:13px;color:var(--text-2);line-height:1.7}
+  .modal-footer{padding:12px 22px 18px;display:flex;justify-content:flex-end;gap:10px}
+
+  @media (max-width:1280px){.filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:960px){
+    .layout{display:block}
+    .sidebar{width:auto;border-right:none;border-bottom:1px solid var(--border)}
+    .filter-grid,.form-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media (max-width:720px){
+    .main{padding:16px}
+    .filter-grid,.form-grid-2,.desc-grid{grid-template-columns:1fr}
+    .json-inline{max-width:240px}
+  }
+
+  [hidden]{display:none!important}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .topbar{justify-content:space-between;gap:12px}
+  .preview-label{font-size:12px;color:var(--text-3)}
+  .page-title .badge{font-size:11px;color:var(--brand);background:var(--brand-soft)}
+  .page-note{background:var(--brand-soft-2);color:var(--text-2);border-color:#dce5ff}
+  .review-rules{margin-top:10px;padding-top:10px;border-top:1px solid #dce5ff}
+  .review-rules summary{cursor:pointer;color:var(--brand);font-weight:600}
+  .review-rules p{margin-top:8px}
+  .action-bar{padding-bottom:14px}
+  .filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .check{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2);cursor:pointer}
+  .check input{accent-color:var(--brand);width:15px;height:15px;flex-shrink:0}
+  .filter-extra{display:flex;align-items:center;gap:16px;margin-top:14px;padding-bottom:4px}
+  .dept-picker{position:relative;min-width:0}
+  .dept-picker>summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;list-style:none;font-weight:400;font-size:13px}
+  .dept-picker>summary::-webkit-details-marker{display:none}
+  .dept-picker>summary{background-image:none;padding-right:11px}
+  .dept-picker>summary:after{content:'⌄';color:var(--text-3)}
+  .dept-picker>summary span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dept-popup{position:absolute;top:42px;left:0;width:max(100%,280px);max-width:85vw;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:10px;z-index:40}
+  .dept-options{max-height:235px;overflow:auto;margin-top:8px}
+  .dept-option{display:block;width:100%;text-align:left;padding:9px;border-radius:6px;font-size:13px}
+  .dept-option:hover,.dept-option.selected{background:var(--brand-soft);color:var(--brand)}
+  .dept-root{font-weight:600}
+  .department-cell{min-width:150px;max-width:210px;white-space:normal!important;line-height:1.6}
+  .department-cell small{display:block;font-size:11px;color:var(--text-3)}
+  .tbl th,.tbl td{padding:14px 12px}
+  .tbl td.actions{position:sticky;right:0;background:white;box-shadow:-4px 0 6px -6px #86909c}
+  .tbl th:last-child{position:sticky;right:0;z-index:2}
+  .json-inline{min-width:210px;max-width:330px}
+  .status-line{padding:12px 16px;margin-bottom:14px;background:#f2faf4;border:1px solid #b7e8c4;border-radius:8px;line-height:1.7;font-size:13px;display:flex;justify-content:space-between;gap:12px}
+  .status-line button{align-self:flex-start;color:var(--text-3)}
+  .inline-error{color:#d03030;background:#fff3f1;border:1px solid #ffd0c9;padding:10px 12px;border-radius:8px;font-size:12.5px;line-height:1.7;margin-top:12px}
+  .quota-row input{width:100%;min-width:0;background:white;color:var(--text-1)}
+  .quota-row{grid-template-columns:minmax(0,1fr) minmax(100px,.65fr) 42px}
+  .quota-json{font-family:ui-monospace,Consolas,monospace;line-height:1.65;font-size:12.5px}
+  .scope-preview{padding:14px;background:var(--brand-soft-2);border:1px solid #dce5ff;border-radius:10px;font-size:13px;line-height:1.8;margin-top:16px}
+  .scope-preview strong{font-size:22px;color:var(--brand);margin:0 3px}
+  .scope-preview .muted{color:var(--text-3);font-size:12px}
+  .modal{width:480px;z-index:104;max-height:90vh;overflow:auto}
+  #confirmMask{z-index:103}
+  .confirm-details{display:grid;grid-template-columns:96px 1fr;gap:8px;font-size:13px;margin:12px 0}
+  .confirm-details dt{color:var(--text-3)}
+  .confirm-details dd{color:var(--text-1);overflow-wrap:anywhere}
+  .confirm-quota{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#f7f8fa;white-space:pre-wrap;max-height:200px;overflow:auto;font-size:12px;line-height:1.6}
+  .drawer .hint{margin-bottom:10px}
+  .drawer-body>.section:last-child{margin-bottom:0}
+  @media(max-width:1100px){.sidebar{width:210px}.main{padding:20px 18px}}
+  @media(max-width:960px){.sidebar{width:auto;padding:12px;display:flex;flex-wrap:wrap;gap:6px}.side-title,.side-desc,.side-doc-link{display:none}.side-item{width:auto;margin:0}.topbar{height:auto;min-height:56px;padding:12px 16px}.preview-label{font-size:11px}.layout{min-height:calc(100vh - 56px)}}
+  @media(max-width:600px){.filter-grid,.form-grid-2{grid-template-columns:1fr}.main{padding:16px 12px}.page-title{font-size:20px}.pager{align-items:flex-start;gap:12px;flex-direction:column}.preview-label{max-width:130px}.drawer{max-width:100vw;width:100vw}.section-note{display:none}.filter-extra{flex-wrap:wrap}.page-desc{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="toast-wrap" id="toastWrap" role="status" aria-live="polite"></div>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-logo">AI</div><div>AI生图管理员配置</div></div>
+    <span class="preview-label">二期交互原型 · 模拟数据 · 刷新恢复</span>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-title">页面入口</div>
+      <button class="side-item" data-version="gen"><span class="dot"></span>美工管理员配置</button>
+      <button class="side-item active" data-version="operation"><span class="dot"></span>运营管理员配置</button>
+      <div class="side-desc">左侧导航用于对照两个独立页面。<br>正式产品仍保留独立入口，各自维护配置数据。</div>
+      <div class="side-doc-link"><a href="docs/v2/AI生图管理员配置二期-PRD.md" target="_blank" rel="noopener">查看二期 PRD ↗</a></div>
+      <div class="side-desc">演示提示<br>选择「销售部」后勾选「包含下级部门」，可查看运营一组和二组。<br><br>按「运营一组 + LinkFox」批量更新，可观察启用、停用配置的变化。</div>
+    </aside>
+    <main class="main">
+      <section class="page-header">
+        <h1 class="page-title"><span id="pageTitle">运营管理员配置</span><span class="badge">二期</span></h1>
+        <div class="page-desc"><span class="page-desc-alert">由指定管理员统一配置，其他人请勿动谢谢，</span><span class="page-desc-muted">排序默认按更新时间倒排</span></div>
+        <div class="page-note"><b>按当前所属部门管理人员额度。</b>兼管其他部门不改变个人归属；批量操作仅覆盖已有配置的 quota，包含停用配置，保留原启停状态。
+          <details class="review-rules"><summary>原型评审说明：新旧任务与异常处理</summary>
+            <p><b>人员归属：</b>通过生图用户ID查询当前所属部门，用于人员展示、部门筛选和批量更新范围；用户ID不是员工工号。</p>
+            <p><b>新旧任务：</b>新任务在实际发起时实时查询当前部门，并优先匹配本部门、再逐级查找最近上级部门的有效凭据。组织记录更新后，新任务自然使用新部门；已提交任务继续使用首次提交时绑定的原部门和凭据。</p>
+            <p><b>异常处理：</b>部门缺失或未配置生图凭据，仍可先保存人员额度配置。实际生图时若取不到有效部门，或本部门及上级部门均无有效凭据，任务直接判失败、记录具体原因并进入「已完成」，结果标记为失败。</p>
+            <p class="hint">以上为评审说明。原型仅演示管理员配置操作；实际生图和任务结果处理以配套 PRD 为准。</p>
+          </details>
+        </div>
+      </section>
+      <section class="card" aria-label="查询条件">
+        <form id="searchForm">
+          <div class="filter-bar">
+            <div class="filter-grid">
+              <div class="form-item"><label for="qUserId">用户ID</label><input class="input" id="qUserId" placeholder="生图用户ID，非员工工号"></div>
+              <div class="form-item"><label for="qUserName">用户名</label><input class="input" id="qUserName" placeholder="请输入完整用户名"></div>
+              <div class="form-item"><label for="qProvider">生图模型</label><select class="select" id="qProvider"></select></div>
+              <div class="form-item"><label id="qDepartmentLabel">所属部门</label><div id="qDepartment"></div></div>
+              <div class="form-item"><label for="qEnabled">状态</label><select class="select" id="qEnabled"><option value="">全部</option><option value="1">已启用</option><option value="0">已停用</option></select></div>
+            </div>
+            <div class="filter-extra"><label class="check"><input type="checkbox" id="qChildren">包含下级部门</label><span class="field-meta">默认仅匹配所选部门直属人员</span></div>
+          </div>
+          <div class="filter-actions"><button class="btn btn-primary" type="submit">查询</button><button class="btn btn-default" type="button" id="btnResetFilter">重置</button></div>
+        </form>
+      </section>
+      <div class="action-bar"><button class="btn btn-primary" id="btnAdd">＋ 新增配置</button><button class="btn btn-default" id="btnBatch">按部门批量更新 quota</button></div>
+      <div class="status-line" id="resultBanner" role="status" hidden><span id="resultText"></span><button id="closeResult" aria-label="关闭操作结果">✕</button></div>
+      <section class="card" aria-label="配置列表">
+        <div class="toolbar"><div class="toolbar-left"><h2 class="toolbar-title">配置列表</h2><span class="toolbar-summary">共 <strong id="totalCount">0</strong> 条</span></div></div>
+        <div class="active-filters" id="activeFilters"></div>
+        <div class="table-wrap"><table class="tbl"><thead><tr><th>ID</th><th>用户ID</th><th>用户名</th><th>当前所属部门</th><th>生图模型</th><th>quota</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+        <div class="pager"><span id="pageInfo"></span><div class="pager-controls"><select class="select" id="pageSize" aria-label="每页条数" style="width:110px"><option value="20">20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select><button id="prevPage">上一页</button><span id="pageNumber"></span><button id="nextPage">下一页</button></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+<div class="mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
+  <div class="drawer-header"><h2 class="drawer-title"><span id="drawerTitle"></span><span class="tag" id="drawerVersion"></span></h2><button class="drawer-close" id="closeDrawer" aria-label="关闭抽屉">✕</button></div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer"><button class="btn btn-default" id="cancelDrawer">取消</button><button class="btn btn-primary" id="submitDrawer">保存</button></div>
+</aside>
+<div class="mask" id="confirmMask"></div>
+<div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true" inert>
+  <div class="modal-body"><h2 class="modal-title" id="confirmTitle"></h2><div id="confirmContent"></div></div>
+  <div class="modal-footer"><button class="btn btn-default" id="cancelConfirm">取消</button><button class="btn btn-primary" id="acceptConfirm">确认</button></div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const names={operation:'运营管理员配置',gen:'美工管理员配置'};
+  const providers=[['1','LinkFox（1）'],['2','自研（2）'],['3','阿里绘蛙（3，已停用）']];
+  const providerName=id=>providers.find(p=>p[0]===String(id))?.[1]||id;
+  const departments=[
+    {id:'sales',name:'销售部',parent:''},{id:'ops1',name:'运营一组',parent:'sales'},{id:'ops2',name:'运营二组',parent:'sales'},
+    {id:'design',name:'创意设计部',parent:''},{id:'art1',name:'美工一组',parent:'design'},{id:'art2',name:'美工二组',parent:'design'},
+    {id:'it',name:'IT部',parent:''},{id:'product',name:'产品组',parent:'it'},{id:'qa',name:'测试组',parent:'it'},
+    {id:'support',name:'业务支持部',parent:''}
+  ];
+  const directory=[
+    ['9101','示例用户01','ops1'],['9102','示例用户02','ops1'],['9103','示例用户03','ops2'],['9104','示例用户04','sales'],
+    ['9105','示例用户05','product'],['9106','示例用户06',''],['9107','示例用户07','ops2'],['9199','示例新员工','ops1'],
+    ['8101','示例美工01','art1'],['8102','示例美工02','art1'],['8103','示例美工03','art2'],['8104','示例美工04','design']
+  ].map(([id,name,dept])=>({id,name,dept}));
+  const department=id=>departments.find(d=>d.id===id);
+  const deptPath=id=>{const d=department(id);return d ? (d.parent?deptPath(d.parent)+' / ':'')+d.name : '未匹配部门';};
+  const user=id=>directory.find(u=>u.id===String(id));
+  const deptOf=row=>user(row.userId)?.dept||'';
+  function inScope(actual,chosen,children){if(!chosen)return true;let d=department(actual);while(d){if(d.id===chosen)return true;if(!children)return false;d=department(d.parent);}return false;}
+  const order=['total','scene','closeUpWhite','closeUp','sellPoint','aplus'];
+  const ordered=q=>[...q.filter(([k])=>order.includes(k)).sort((a,b)=>order.indexOf(a[0])-order.indexOf(b[0])),...q.filter(([k])=>!order.includes(k))];
+  const quotaText=(q,pretty=false)=>'{'+(pretty?'\n':'')+ordered(q).map(([k,v])=>(pretty?'  ':'')+JSON.stringify(k)+': '+v).join(pretty?',\n':', ')+(pretty?'\n':'')+'}';
+  const defaultQuota=()=>[['total','1000'],['scene','3'],['closeUpWhite','0'],['closeUp','2'],['sellPoint','2'],['aplus','7']];
+  function record(id,uid,model,enabled,quota){return {id,userId:uid,userName:user(uid).name,provider:model,enabled,quota:quota||defaultQuota(),created:'2026-10-20 09:00:00',updated:`2026-10-22 10:${String(30-id%20).padStart(2,'0')}:00`};}
+  const db={operation:[record(101,'9101','1',true),record(102,'9102','1',false,[['total','500'],['scene','2']]),record(103,'9101','2',true,[['total','60']]),record(104,'9103','1',true),record(105,'9104','1',true),record(106,'9105','1',true),record(107,'9106','1',false),record(108,'9107','3',false,[['total','16']])],gen:[record(201,'8101','1',true),record(202,'8102','1',false,[['total','200']]),record(203,'8103','1',true),record(204,'8101','2',true,[['total','60']]),record(205,'8104','1',true)]};
+  let version='operation',filters={},page=1,pageSize=20,queryDept,drawerMode='',editing=null,returnFocus=null,modalFocus=null,onConfirm=null,busy=false,editor,batchDept;
+  const now=()=>new Date().toLocaleString('sv-SE');
+  const toast=message=>{const n=document.createElement('div');n.className='toast';n.textContent=message;$('#toastWrap').append(n);setTimeout(()=>n.remove(),4000);};
+  const options=(empty='全部')=>`<option value="">${empty}</option>`+providers.map(([id,n])=>`<option value="${id}">${n}</option>`).join('');
+  function departmentPicker(host,label,empty,changed){
+    const el=$(host);el.innerHTML=`<details class="dept-picker"><summary class="select" aria-labelledby="${label}"><span>${empty}</span></summary><div class="dept-popup"><input class="input" placeholder="搜索部门名称" aria-label="搜索部门名称"><div class="dept-options"></div></div></details>`;
+    const details=el.querySelector('details'),search=el.querySelector('input'),choices=el.querySelector('.dept-options');let chosen='';
+    function render(){const term=search.value.trim();choices.innerHTML=`<button class="dept-option" type="button" data-dept="">${empty}</button>`+departments.filter(d=>!term||deptPath(d.id).includes(term)).map(d=>`<button type="button" class="dept-option ${!d.parent?'dept-root':''} ${chosen===d.id?'selected':''}" data-dept="${d.id}" style="padding-left:${d.parent?26:9}px">${d.parent?'└ ':''}${esc(d.name)}</button>`).join('');}
+    function set(id){chosen=id;el.querySelector('summary span').textContent=id?deptPath(id):empty;render();}
+    choices.addEventListener('click',e=>{const b=e.target.closest('[data-dept]');if(!b)return;set(b.dataset.dept);details.open=false;el.querySelector('summary').focus();changed?.();});
+    search.addEventListener('input',render);details.addEventListener('toggle',()=>{if(details.open){search.value='';render();}});render();
+    return {get:()=>chosen,set};
+  }
+  function filteredRows(){return db[version].filter(r=>(!filters.uid||r.userId===filters.uid)&&(!filters.name||r.userName===filters.name)&&(!filters.provider||r.provider===filters.provider)&&(filters.enabled===undefined||filters.enabled===''||Number(r.enabled)===Number(filters.enabled))&&inScope(deptOf(r),filters.dept,filters.children)).sort((a,b)=>b.updated.localeCompare(a.updated)||b.id-a.id);}
+  function renderList(){
+    const rows=filteredRows(),pages=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.min(page,pages);const start=(page-1)*pageSize;
+    $('#totalCount').textContent=rows.length;$('#pageInfo').textContent=`第 ${rows.length?start+1:0} - ${Math.min(start+pageSize,rows.length)} 条，共 ${rows.length} 条`;
+    $('#pageNumber').textContent=`${page} / ${pages}`;$('#prevPage').disabled=page===1;$('#nextPage').disabled=page===pages;
+    const chips=[];if(filters.uid)chips.push('用户ID：'+filters.uid);if(filters.name)chips.push('用户名：'+filters.name);if(filters.provider)chips.push(providerName(filters.provider));if(filters.dept)chips.push(deptPath(filters.dept)+(filters.children?'（含下级）':'（仅本部门）'));if(filters.enabled==='0'||filters.enabled==='1')chips.push(filters.enabled==='1'?'已启用':'已停用');
+    $('#activeFilters').innerHTML=chips.map(c=>`<span class="filter-chip">${esc(c)}</span>`).join('');$('#activeFilters').hidden=!chips.length;
+    $('#tableBody').innerHTML=rows.slice(start,start+pageSize).map(r=>{const d=department(deptOf(r));return `<tr><td class="id-cell">${r.id}</td><td class="mono">${r.userId}</td><td class="username-cell">${esc(r.userName)}</td><td class="department-cell">${esc(d?.name||'未匹配部门')}${d?.parent?`<small>${esc(deptPath(d.parent))}</small>`:''}</td><td>${esc(providerName(r.provider))}</td><td><div class="json-inline" title="${esc(quotaText(r.quota))}">${esc(quotaText(r.quota))}</div></td><td><span class="badge ${r.enabled?'badge-success':'badge-muted'}"><span class="dot"></span>${r.enabled?'已启用':'已停用'}</span></td><td class="mono">${r.updated}</td><td class="actions"><button class="btn-text" data-action="view" data-id="${r.id}">查看</button><button class="btn-text" data-action="edit" data-id="${r.id}">编辑</button><button class="btn-text danger" data-action="delete" data-id="${r.id}">删除</button></td></tr>`;}).join('')||'<tr><td colspan="9"><div class="empty"><div class="empty-title">暂无符合条件的配置</div><div class="empty-desc">请调整查询条件后重试</div></div></td></tr>';
+  }
+  function resetFilters(){filters={};page=1;$('#searchForm').reset();queryDept.set('');renderList();}
+  function openDrawer(mode,title){
+    if(!$('#drawer').classList.contains('show'))returnFocus=document.activeElement;
+    drawerMode=mode;$('#drawerTitle').textContent=title;$('#drawerVersion').textContent=names[version];$('#drawerMask').classList.add('show');$('#drawer').classList.add('show');$('#drawer').inert=false;$('#drawer').setAttribute('aria-hidden','false');$('#app').inert=true;document.body.style.overflow='hidden';$('#drawerBody').scrollTop=0;$('#cancelDrawer').textContent=mode==='view'?'关闭':'取消';$('#submitDrawer').disabled=false;$('#closeDrawer').focus();
+  }
+  function closeDrawer(restore=true){if(busy)return;$('#drawerMask').classList.remove('show');$('#drawer').classList.remove('show');$('#drawer').inert=true;$('#drawer').setAttribute('aria-hidden','true');$('#app').inert=false;document.body.style.overflow='';drawerMode='';if(restore&&returnFocus?.isConnected)returnFocus.focus();}
+  function showConfirm(title,content,action,label='确认更新'){
+    modalFocus=document.activeElement;onConfirm=action;$('#confirmTitle').textContent=title;$('#confirmContent').innerHTML=content;$('#acceptConfirm').textContent=label;$('#acceptConfirm').disabled=false;$('#confirmMask').classList.add('show');$('#confirmModal').classList.add('show');$('#confirmModal').inert=false;$('#confirmModal').setAttribute('aria-hidden','false');$('#drawer').inert=true;$('#app').inert=true;document.body.style.overflow='hidden';$('#cancelConfirm').focus();
+  }
+  function hideConfirm(restore=true){if(busy)return;$('#confirmMask').classList.remove('show');$('#confirmModal').classList.remove('show');$('#confirmModal').inert=true;$('#confirmModal').setAttribute('aria-hidden','true');const open=$('#drawer').classList.contains('show');$('#drawer').inert=!open;$('#app').inert=open;if(!open)document.body.style.overflow='';onConfirm=null;if(restore&&modalFocus?.isConnected)modalFocus.focus();}
+  function error(text){$('#drawerError').textContent=text;$('#drawerError').hidden=false;$('#drawerError').scrollIntoView({block:'nearest'});}
+  function clearError(){$('#drawerError').hidden=true;}
+  function validInteger(token){
+    const m=/^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(token);if(!m)return false;
+    const digits=m[2]+(m[3]||'');if(/^0+$/.test(digits))return true;if(m[1])return false;
+    const shift=BigInt(m[4]||0)-BigInt((m[3]||'').length);return shift>=0n||BigInt((digits.match(/0*$/)||[''])[0].length)>=-shift;
+  }
+  function checkEntries(entries){if(!entries.length)throw Error('quota 不能为空，请至少填写一个字段。');const keys=new Set();for(const [k,v] of entries){if(!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(k))throw Error('字段 key 须以字母或下划线开头，仅含字母、数字、下划线。');if(keys.has(k))throw Error(`字段 key「${k}」重复，请修改后再提交。`);keys.add(k);if(!validInteger(v))throw Error(`「${k}」的额度值必须为非负整数，允许 0。`);}return entries;}
+  // Read flat quota JSON as text tokens so large integer values remain exact.
+  function parseQuota(raw){
+    let p=0;const entries=[],skip=()=>{while(/\s/.test(raw[p]||'')&&p<raw.length)p++;};skip();if(raw[p++]!=='{')throw Error('quota 必须为非空 JSON 对象。');skip();
+    if(raw[p]!=='}')while(true){skip();const m=/^"(?:[^"\\\u0000-\u001f]|\\(?:["\\/bfnrt]|u[\da-fA-F]{4}))*"/.exec(raw.slice(p));if(!m)throw Error('JSON 格式错误：字段 key 必须使用双引号。');const key=JSON.parse(m[0]);p+=m[0].length;skip();if(raw[p++]!==':')throw Error('JSON 格式错误：字段后缺少冒号。');skip();const value=/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/.exec(raw.slice(p));if(!value)throw Error('额度值必须为非负整数，不能是字符串或其他类型。');p+=value[0].length;entries.push([key,value[0]]);skip();if(raw[p]===','){p++;continue;}if(raw[p]==='}')break;throw Error('JSON 格式错误，请检查逗号和额度值。');}
+    if(raw[p++]!=='}')throw Error('JSON 格式错误：缺少右花括号。');skip();if(p!==raw.length)throw Error('JSON 对象后存在多余内容。');return checkEntries(entries);
+  }
+  function numberSignature(t){const m=/^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(t),all=(m[2]+(m[3]||'')).replace(/^0+/,'');if(!all)return '0';const zeros=all.match(/0*$/)[0].length;return all.slice(0,all.length-zeros)+'e'+(BigInt(m[4]||0)-BigInt((m[3]||'').length)+BigInt(zeros));}
+  const quotaSignature=q=>JSON.stringify(q.map(([k,v])=>[k,numberSignature(v)]).sort((a,b)=>a[0].localeCompare(b[0])));
+  function quotaEditor(initial){
+    const host=$('#quotaHost');let mode='structured';host.innerHTML=`<div class="mode-switch"><button type="button" class="active" data-mode="structured">结构化填写</button><button type="button" data-mode="json">JSON填写</button></div><div class="quota-panel" id="structuredPanel"><div class="quota-editor"><div class="quota-row header"><div>字段 key</div><div>额度值</div><div></div></div><div id="quotaRows"></div><div class="quota-add"><button class="btn-text" id="addQuotaRow" type="button">＋ 新增 quota 字段</button></div></div></div><div class="quota-panel" id="jsonPanel" hidden><textarea class="input quota-json" id="quotaJson" aria-label="quota JSON" spellcheck="false"></textarea></div><div class="hint">quota 为非空对象；key 不可重复；额度值为非负整数，允许 0。<br>展示顺序：total → scene → closeUpWhite → closeUp → sellPoint → aplus。</div>`;
+    function row(k='',v=''){return `<div class="quota-row"><input aria-label="字段 key" value="${esc(k)}" placeholder="如 total"><input aria-label="额度值" value="${esc(v)}" inputmode="numeric" placeholder="非负整数"><button type="button" class="quota-del" aria-label="删除 quota 字段">×</button></div>`;}
+    function populate(q){$('#quotaRows').innerHTML=ordered(q).map(([k,v])=>row(k,v)).join('');$('#quotaJson').value=quotaText(q,true);}
+    function get(){if(mode==='json')return parseQuota($('#quotaJson').value);return checkEntries(Array.from($('#quotaRows').children).map(r=>Array.from(r.querySelectorAll('input')).map(i=>i.value.trim())));}
+    populate(initial);$('#addQuotaRow').onclick=()=>{$('#quotaRows').insertAdjacentHTML('beforeend',row());$('#quotaRows').lastElementChild.querySelector('input').focus();};
+    $('#quotaRows').onclick=e=>{if(e.target.closest('.quota-del'))e.target.closest('.quota-row').remove();};
+    host.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{if(mode===b.dataset.mode)return;try{const q=get();populate(q);clearError();mode=b.dataset.mode;$('#structuredPanel').hidden=mode!=='structured';$('#jsonPanel').hidden=mode!=='json';host.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===mode));}catch(e){error(e.message);}});return {get};
+  }
+  function openView(r){editing=r;$('#drawerBody').innerHTML=`<section class="section"><div class="section-title">基本信息</div><dl class="desc-grid"><dt>用户ID</dt><dd>${r.userId}</dd><dt>用户名</dt><dd>${esc(r.userName)}</dd><dt>生图模型</dt><dd>${esc(providerName(r.provider))}</dd><dt>当前所属部门</dt><dd>${esc(deptPath(deptOf(r)))}</dd><dt>状态</dt><dd>${r.enabled?'已启用':'已停用'}</dd><dt>创建时间</dt><dd>${r.created}</dd><dt>更新时间</dt><dd>${r.updated}</dd></dl></section><section class="section"><div class="section-title">quota</div><pre class="code-block">${esc(quotaText(r.quota,true))}</pre></section>`;$('#submitDrawer').textContent='编辑';openDrawer('view','查看配置');}
+  function openForm(r=null){
+    editing=r;$('#drawerBody').innerHTML=`<section class="section"><div class="section-title">基本信息<span class="section-note">${r?'主标识字段只读':'新增用户模型配置'}</span></div><div class="form-grid-2"><div class="form-item"><label for="fUserId"><span class="req">*</span>用户ID</label><input class="input ${r?'readonly':''}" id="fUserId" ${r?'readonly':''} value="${r?.userId||''}" placeholder="生图用户ID，非员工工号"></div><div class="form-item"><label for="fProvider"><span class="req">*</span>生图模型</label><select class="select ${r?'readonly':''}" id="fProvider" ${r?'disabled':''}>${options('请选择')}</select></div><div class="form-item"><label for="fUserName"><span class="req">*</span>用户名</label><input class="input ${r?'readonly':''}" id="fUserName" ${r?'readonly':''} value="${esc(r?.userName||'')}" placeholder="请输入完整用户名"></div><div class="form-item"><label for="fDepartment">当前所属部门 <span class="field-meta badge">只读</span></label><input class="input readonly" id="fDepartment" readonly value="${r?esc(deptPath(deptOf(r))):'填写用户ID后显示'}"></div></div><div class="hint">部门按用户ID查询当前组织记录，在此处不可修改。未匹配到部门也可正常保存人员额度配置。${r?'':'原型可使用示例新员工 9199；示例用户 9106 未匹配部门。'}</div></section><section class="section"><div class="section-title">quota<span class="section-note">两种填写方式可切换</span></div><div id="quotaHost"></div></section><section class="section"><div class="section-title">启用状态</div><label class="check"><input id="fEnabled" type="checkbox" ${!r||r.enabled?'checked':''}>启用此用户模型配置</label><div class="hint">启用后仍须通过现有额度及生图配置检查。</div></section><div class="inline-error" id="drawerError" role="alert" hidden></div>`;
+    $('#fProvider').value=r?.provider||'';editor=quotaEditor(r?r.quota:defaultQuota());$('#submitDrawer').textContent='保存';openDrawer(r?'edit':'add',r?'编辑配置':'新增配置');
+    const updateOrg=()=>{const u=user($('#fUserId').value.trim());$('#fDepartment').value=u?deptPath(u.dept):'未匹配部门';if(u)$('#fUserName').value=u.name;};if(!r)$('#fUserId').addEventListener('input',updateOrg);
+  }
+  function saveForm(){try{clearError();const uid=$('#fUserId').value.trim(),name=$('#fUserName').value.trim(),model=$('#fProvider').value;if(!/^\d+$/.test(uid))throw Error('请输入有效的数字用户ID。');if(!name)throw Error('请填写用户名。');if(!model)throw Error('请选择生图模型。');if(db[version].some(r=>r!==editing&&r.userId===uid&&r.provider===model))throw Error('当前页面已存在该用户的同模型配置，请编辑已有记录。');const quota=editor.get();if(editing){editing.quota=quota;editing.enabled=$('#fEnabled').checked;editing.updated=now();}else db[version].push({id:Math.max(...Object.values(db).flat().map(r=>r.id))+1,userId:uid,userName:name,provider:model,enabled:$('#fEnabled').checked,quota,created:now(),updated:now()});closeDrawer(false);renderList();$('#btnAdd').focus();toast('配置已保存（仅当前演示）');}catch(e){error(e.message);}}
+  function batchMatches(){return !batchDept.get()||!$('#bProvider').value?[]:db[version].filter(r=>r.provider===$('#bProvider').value&&inScope(deptOf(r),batchDept.get(),$('#bChildren').checked));}
+  function previewBatch(){clearError();const chosen=batchDept.get(),model=$('#bProvider').value;const rows=batchMatches();$('#scopePreview').innerHTML=!chosen||!model?'选择部门和生图模型后，显示预计命中配置数。':`预计命中 <strong>${rows.length}</strong> 条已有配置<br><span class="muted">其中已启用 ${rows.filter(r=>r.enabled).length} 条，已停用 ${rows.filter(r=>!r.enabled).length} 条。${rows.length?'未配置该模型的员工不计入。':'未命中任何记录，请调整范围。'}</span>`;}
+  function openBatch(){
+    $('#drawerBody').innerHTML=`<section class="section"><div class="section-title">选择更新范围<span class="section-note">仅当前页面已有配置</span></div><div class="form-grid-2"><div class="form-item"><label id="bDepartmentLabel"><span class="req">*</span>所属部门</label><div id="bDepartment"></div></div><div class="form-item"><label for="bProvider"><span class="req">*</span>生图模型</label><select class="select" id="bProvider">${options('请选择')}</select></div></div><div class="filter-extra"><label class="check"><input type="checkbox" id="bChildren">包含下级部门</label></div><div class="scope-preview" id="scopePreview" role="status"></div></section><section class="section"><div class="section-title">统一设置 quota</div><div class="warn-box" style="margin-bottom:14px">将覆盖命中配置的<strong>完整 quota</strong>，原有但未填写的字段会被移除。<br>包含停用配置，保留原启停状态；不会为未配置的员工新增配置。</div><div id="quotaHost"></div></section><div class="inline-error" id="drawerError" role="alert" hidden></div>`;
+    batchDept=departmentPicker('#bDepartment','bDepartmentLabel','请选择部门',previewBatch);editor=quotaEditor(defaultQuota());$('#bProvider').onchange=previewBatch;$('#bChildren').onchange=previewBatch;$('#submitDrawer').textContent='预览并确认';openDrawer('batch','按部门批量更新 quota');previewBatch();
+  }
+  function confirmBatch(){try{clearError();if(!batchDept.get())throw Error('请选择所属部门。');if(!$('#bProvider').value)throw Error('请选择生图模型。');const quota=editor.get(),rows=batchMatches();if(!rows.length)throw Error('未命中任何记录，请调整部门或模型，已保留当前输入。');
+    const scope=deptPath(batchDept.get()),children=$('#bChildren').checked,model=$('#bProvider').value;
+    showConfirm('确认批量覆盖 quota',`<p class="modal-desc">请核对本次更新范围及完整额度内容。</p><dl class="confirm-details"><dt>业务页面</dt><dd>${names[version]}</dd><dt>所属部门</dt><dd>${esc(scope)}</dd><dt>包含下级</dt><dd>${children?'是':'否，仅本部门'}</dd><dt>生图模型</dt><dd>${esc(providerName(model))}</dd><dt>预计命中</dt><dd>${rows.length} 条配置（含 ${rows.filter(r=>!r.enabled).length} 条停用配置）</dd></dl><pre class="confirm-quota">${esc(quotaText(quota,true))}</pre><div class="hint">覆盖完整 quota；不改变启停状态，不新增人员配置。</div>`,()=>{const current=batchMatches();if(current.length!==rows.length){hideConfirm();previewBatch();error('更新范围已变化，请重新确认。');return;}let modified=0;for(const r of current){if(quotaSignature(r.quota)!==quotaSignature(quota)){r.quota=quota.map(pair=>[...pair]);r.updated=now();modified++;}}hideConfirm(false);closeDrawer(false);renderList();$('#resultText').textContent=`批量更新完成：${scope} · ${providerName(model)} · ${children?'含下级':'仅本部门'}。匹配 ${current.length} 条，实际修改 ${modified} 条${current.length>modified?`（${current.length-modified} 条额度相同）`:''}；启停状态保持不变。`;$('#resultBanner').hidden=false;$('#btnBatch').focus();toast('批量更新完成（仅当前演示）');});
+    }catch(e){error(e.message);}}
+  function deleteRecord(r){showConfirm('删除配置',`<p class="modal-desc">确认删除「${esc(r.userName)}」的 ${esc(providerName(r.provider))} 配置？<br>仅删除当前页面这条用户模型配置，删除后不可恢复。</p>`,()=>{db[version]=db[version].filter(x=>x.id!==r.id);hideConfirm(false);renderList();$('#btnAdd').focus();toast('配置已删除（仅当前演示）');},'确认删除');}
+  $('#qProvider').innerHTML=options();queryDept=departmentPicker('#qDepartment','qDepartmentLabel','全部部门');
+  $('#searchForm').onsubmit=e=>{e.preventDefault();filters={uid:$('#qUserId').value.trim(),name:$('#qUserName').value.trim(),provider:$('#qProvider').value,enabled:$('#qEnabled').value,dept:queryDept.get(),children:$('#qChildren').checked};page=1;renderList();};
+  $('#btnResetFilter').onclick=resetFilters;$('#btnAdd').onclick=()=>openForm();$('#btnBatch').onclick=openBatch;$('#closeResult').onclick=()=>$('#resultBanner').hidden=true;
+  $$('[data-version]').forEach(b=>b.onclick=()=>{version=b.dataset.version;$$('[data-version]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-current',x===b?'page':'false');});$('#pageTitle').textContent=names[version];pageSize=20;$('#pageSize').value='20';$('#resultBanner').hidden=true;resetFilters();});
+  $('#pageSize').onchange=e=>{pageSize=Number(e.target.value);page=1;renderList();};$('#prevPage').onclick=()=>{page--;renderList();};$('#nextPage').onclick=()=>{page++;renderList();};
+  $('#tableBody').onclick=e=>{const b=e.target.closest('[data-action]');if(!b)return;const r=db[version].find(r=>r.id===Number(b.dataset.id));if(!r)return;if(b.dataset.action==='view')openView(r);if(b.dataset.action==='edit')openForm(r);if(b.dataset.action==='delete')deleteRecord(r);};
+  $('#closeDrawer').onclick=()=>closeDrawer();$('#cancelDrawer').onclick=()=>closeDrawer();$('#drawerMask').onclick=()=>closeDrawer();
+  $('#submitDrawer').onclick=()=>{if(drawerMode==='view')openForm(editing);else if(drawerMode==='batch')confirmBatch();else saveForm();};
+  $('#cancelConfirm').onclick=()=>hideConfirm();$('#confirmMask').onclick=()=>hideConfirm();$('#acceptConfirm').onclick=()=>{if(busy||!onConfirm)return;busy=true;$('#acceptConfirm').disabled=true;$('#acceptConfirm').textContent='处理中…';const action=onConfirm;setTimeout(()=>{busy=false;action();},220);};
+  document.addEventListener('click',e=>{$$('details[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});});
+  document.addEventListener('keydown',e=>{
+    const modal=$('#confirmModal').classList.contains('show'),drawer=$('#drawer').classList.contains('show');
+    if(e.key==='Escape'){const details=$$('details[open]');if(details.length){details.forEach(d=>d.open=false);return;}if(modal)hideConfirm();else if(drawer)closeDrawer();}
+    if(e.key==='Tab'&&(modal||drawer)){const panel=modal?$('#confirmModal'):$('#drawer');const focusable=Array.from(panel.querySelectorAll('button,input,select,textarea,summary,a[href]')).filter(el=>!el.disabled&&el.getClientRects().length&&!el.closest('[hidden]')&&(!el.closest('details')||el.tagName==='SUMMARY'||el.closest('details').open));const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+  });
+  renderList();
+})();
+</script>
+</body>
+</html>

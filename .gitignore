@@ -1,0 +1,12 @@
+# Only reviewed public deliverables may enter this repository.
+/*
+!/.gitignore
+!/.markdownlint.json
+!/README.md
+!/index.html
+!/docs/
+/docs/*
+!/docs/v2/
+/docs/v2/*
+!/docs/v2/AI生图管理员配置二期-PRD.md
+!/docs/v2/AI生图管理员配置二期-Codex交接与核查.md
