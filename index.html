@@ -3,404 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AI生图管理员配置二期交互原型：部门筛选、人员配置与部门批量额度更新。所有数据均为虚构演示。">
 <title>AI生图管理员配置 · 二期原型</title>
 <style>
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
-    font-size:14px;color:#1f2329;background:#f5f6f8;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  }
-  button,input,select,textarea{font:inherit}
-  button{border:none;background:none;cursor:pointer}
-  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+  :root{color-scheme:light;--brand:#409eff;--brand-hover:#66b1ff;--brand-soft:#ecf5ff;--text:#303133;--muted:#909399;--line:#e4e7ed;--soft:#f5f7fa;--danger:#f56c6c;--success:#67c23a}
+  *{box-sizing:border-box}body{margin:0;color:var(--text);background:#fff;font:12px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}
+  button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}[hidden]{display:none!important}
+  button,a,input,select,textarea,summary{outline-offset:3px}button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--brand)}
+  input,select,textarea{min-width:0}code,pre,.mono,.json-inline{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}a{color:#337ecc;text-decoration:none}a:hover{text-decoration:underline}
+  .topbar{min-height:42px;background:var(--brand);color:white;display:flex;align-items:center;gap:24px;padding:0 18px}
+  .brand{font-size:13px;font-weight:600;white-space:nowrap;display:flex;gap:8px;align-items:center}.brand-symbol{font-size:17px}
+  .page-tabs{display:flex;align-self:stretch;align-items:flex-end;gap:4px}.side-item{height:35px;border:0;border-radius:5px 5px 0 0;padding:0 17px;background:transparent;color:#eef7ff;white-space:nowrap}
+  .side-item:hover{background:#ffffff18}.side-item.active{background:white;color:#337ecc}.side-item:focus-visible{outline-color:white;outline-offset:-4px}
+  .top-meta{margin-left:auto;display:flex;align-items:center;gap:18px;color:#eff7ff;white-space:nowrap}.top-meta a{color:white}.preview-label{font-size:11px}
+  .main{padding:12px 16px 24px;max-width:none;margin:0 auto}.page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .page-desc{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:5px 10px;border:1px solid #fbc4c4;border-radius:4px;background:#fef0f0;line-height:1.6}
+  .page-desc-alert{color:#f20d0d;font-weight:500}.page-desc-muted{color:var(--muted);font-size:11px}
+  .change-overview{max-width:1240px;padding:24px 24px 32px;font-size:13px;line-height:1.8}.overview-heading{display:flex;align-items:center;gap:12px;margin-bottom:5px}.overview-heading h1{font-size:22px;line-height:1.5;margin:0;font-weight:600}.review-tag{padding:2px 8px;border:1px solid #d9ecff;border-radius:4px;background:#ecf5ff;color:#337ecc;font-size:11px;white-space:nowrap}.overview-lead{margin:0 0 20px;color:#606266}.overview-lead span{color:#909399}
+  .comparison-wrap{border:1px solid var(--line);border-radius:6px;overflow:auto}.comparison-table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:650px}.comparison-table th,.comparison-table td{padding:14px 18px;text-align:left;vertical-align:top;border-bottom:1px solid #ebeef5;border-right:1px solid #ebeef5;overflow-wrap:anywhere}.comparison-table thead th{background:#f5f7fa;color:#606266;font-size:12px;font-weight:600}.comparison-table thead th:first-child{width:16%}.comparison-table thead th:nth-child(2){width:34%}.comparison-table thead th:last-child{width:50%;background:#ecf5ff;color:#337ecc}.comparison-table th:last-child,.comparison-table td:last-child{border-right:0}.comparison-table tbody tr:last-child>*{border-bottom:0}.comparison-table tbody th{font-weight:600;background:#fafbfc}.comparison-table td:nth-child(2){color:#909399}.comparison-table td:last-child{background:#fbfdff}.comparison-table p{margin:0}.comparison-table p+p{margin-top:5px}.comparison-table strong{font-weight:600;color:#303133}
+  .overview-bottom{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}.overview-panel{padding:16px 18px;border:1px solid var(--line);border-radius:6px}.overview-panel h2{font-size:14px;margin:0 0 10px;font-weight:600}.overview-rules{margin:0;padding-left:18px;color:#606266}.overview-rules li+li{margin-top:7px}.sample-table{border-collapse:collapse;width:100%;font-size:12px}.sample-table th,.sample-table td{text-align:left;padding:7px 8px;border-bottom:1px solid #ebeef5}.sample-table th{font-weight:500;color:#909399;background:#fafbfc}.sample-table th:first-child,.sample-table td:first-child{padding-left:0}.sample-table tbody tr:last-child td{border-bottom:0}.overview-note{font-size:12px;color:#909399;margin:10px 0 0}.overview-footer{color:#909399;font-size:12px;margin:16px 0 0}
+  .filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:10px;align-items:end}.filter-grid>.form-item{position:relative}.filter-grid>.form-item>label{position:absolute;right:calc(100% + 8px);top:50%;transform:translateY(-50%);width:max-content;margin:0;padding:6px 8px;border:0;border-radius:6px;background:#404040;color:white;font-size:12px;line-height:20px;white-space:nowrap;box-shadow:0 4px 12px #0002;pointer-events:none;opacity:0;z-index:50;transition:opacity .12s}
+  .filter-grid>.form-item:first-child>label{right:auto;left:0;top:-8px;transform:translateY(-100%)}.filter-grid>.form-item:hover>label{opacity:1}.filter-grid>.form-item:has(.dept-picker[open])>label{opacity:0}
+  .form-item{display:flex;flex-direction:column;gap:6px;min-width:0}.form-item>label{font-size:12px;color:#606266;display:flex;align-items:center;gap:4px}.req{color:var(--danger)}
+  .input,.select{width:100%;height:32px;padding:5px 11px;border:1px solid #dcdfe6;border-radius:6px;background:#fff;color:var(--text);outline:none}.input::placeholder,textarea::placeholder{color:#b5b9c0}.input:hover,.select:hover{border-color:#b7bbc4}.input:focus,.select:focus{border-color:var(--brand);box-shadow:0 0 0 2px #409eff12}
+  select.select{padding-right:28px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23a8abb2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
+  .input.readonly,.select.readonly{background:#f5f7fa;color:#909399;border-color:#e4e7ed;cursor:default;box-shadow:none}.field-meta{color:var(--muted);font-size:11px}.field-meta.badge{padding:1px 6px;background:#f4f4f5;border-radius:10px;font-size:11px;margin-left:3px;font-weight:400}
+  .filter-actions{display:flex;gap:7px}.filter-extra{display:flex;align-items:center;gap:12px;margin-top:8px;min-height:20px;color:var(--muted)}.check{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:#606266}.check input{accent-color:var(--brand);width:14px;height:14px;margin:0}.check:has(input:disabled){color:#a8abb2;cursor:default}
+  .btn{height:32px;padding:0 15px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid #dcdfe6;border-radius:6px;background:white;color:#606266;white-space:nowrap;line-height:1.4}.btn:hover{color:var(--brand);border-color:#b3d8ff;background:#ecf5ff}.btn-primary{color:white;background:var(--brand);border-color:var(--brand)}.btn-primary:hover{background:var(--brand-hover);border-color:var(--brand-hover);color:white}.btn-danger{color:#f56c6c;border-color:#fbc4c4}.btn-text{border:0;background:transparent;color:#409eff;padding:0;cursor:pointer}.btn-text:hover{text-decoration:underline}
+  .action-bar{display:flex;align-items:center;gap:8px;margin:12px 0 10px}.action-icon{font-size:15px;line-height:1}
+  .card{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .table-wrap{overflow:auto}.tbl{width:100%;border-spacing:0;border-collapse:separate;table-layout:fixed;min-width:1040px}.tbl th,.tbl td{padding:9px 10px;border-right:1px solid #ebeef5;border-bottom:1px solid #ebeef5;text-align:center;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;height:46px}.tbl th{height:36px;background:#fafafa;color:#303133;font-size:12px;font-weight:600}.tbl th:last-child,.tbl td:last-child{border-right:0}.tbl tbody tr:last-child td{border-bottom:0}.tbl tbody tr:nth-child(even) td{background:#f2f6fc}.tbl tbody tr:hover td{background:#ecf5ff}.tbl tr.is-highlighted td{background:#ecf5ff;box-shadow:inset 0 1px #b3d8ff,inset 0 -1px #b3d8ff}
+  .tbl th:nth-child(1){width:6%}.tbl th:nth-child(2){width:7.5%}.tbl th:nth-child(3){width:10%}.tbl th:nth-child(4){width:15%}.tbl th:nth-child(5){width:12%}.tbl th:nth-child(6){width:auto}.tbl th:nth-child(7){width:8%}.tbl th:nth-child(8){width:13%}.tbl th:nth-child(9){width:5.5%}
+  .id-cell,.mono{font-size:11px}.username-cell{font-weight:400}.tbl td.department-cell{white-space:normal;text-align:left;line-height:1.5}.dept-path{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.json-inline{display:block;text-align:left;padding:5px 7px;background:#fafafa;border:1px solid #ebeef5;border-radius:5px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+  .badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;border-radius:12px;padding:1px 8px;font-size:11px;line-height:18px;white-space:nowrap}.badge-success{color:#67c23a;background:#f0f9eb;border:1px solid #c2e7b0}.badge-muted{color:#909399;background:#f4f4f5;border:1px solid #dcdfe6}.badge .dot{width:4px;height:4px;border-radius:50%;background:currentColor}
+  .row-action{display:inline-flex;align-items:center;justify-content:center;width:27px;height:24px;padding:0;border:1px solid #dcdfe6;border-radius:3px;background:white;color:#606266}.row-action:hover,.row-action[aria-expanded=true]{color:var(--brand);border-color:#a0cfff}.row-action svg{width:14px;height:14px}.row-menu{position:fixed;z-index:60;width:104px;background:white;border:1px solid #e4e7ed;border-radius:4px;padding:4px;box-shadow:0 4px 16px #00000018}.row-menu button{display:block;width:100%;text-align:left;padding:7px 12px;border:0;background:white;color:#606266;border-radius:3px}.row-menu button:hover,.row-menu button:focus{background:#ecf5ff;color:#409eff}.row-menu button[data-action=delete]{color:#f56c6c}
+  .pager{display:flex;justify-content:flex-end;align-items:center;gap:16px;min-height:48px;padding:8px 10px;border-top:1px solid #ebeef5;color:#606266;font-size:12px}.pager-controls,.page-numbers{display:flex;align-items:center;gap:8px}.pager-controls{flex-wrap:wrap}.pager-controls button{min-width:32px;height:32px;border:1px solid transparent;border-radius:6px;background:white;color:#606266;padding:0 7px}.pager-controls button:hover:not(:disabled){color:var(--brand);border-color:var(--brand)}.pager-controls button[aria-current=page]{color:var(--brand);border-color:var(--brand);font-weight:500}.pager-controls .select{width:100px}.page-ellipsis{width:24px;text-align:center;color:#909399}.page-jump{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.page-jump .input{width:48px;padding:5px 7px;text-align:center}
+  .empty{padding:48px 12px;color:var(--muted);text-align:center;white-space:normal}.empty-title{font-size:13px;color:#606266;margin-bottom:5px}.empty-desc{font-size:12px}.empty .btn-text{margin-top:10px}
+  .status-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 12px;background:#f0f9eb;border:1px solid #e1f3d8;border-radius:4px;margin-bottom:10px;line-height:1.7;color:#529b2e}.status-line>span{flex:1;min-width:220px}.status-line button{font-size:12px}.status-close{border:0;background:transparent;color:#909399;padding:0 3px}
+  .mask{position:fixed;inset:0;background:#0006;z-index:100;opacity:0;pointer-events:none;transition:opacity .18s}.mask.show{opacity:1;pointer-events:auto}.drawer{position:fixed;right:0;top:0;bottom:0;width:768px;max-width:100vw;display:flex;flex-direction:column;background:white;z-index:101;transform:translateX(100%);transition:transform .2s;box-shadow:-6px 0 22px #0000000d}.drawer.show{transform:translateX(0)}
+  .drawer-header{padding:18px 24px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;min-height:66px}.drawer-title{font-size:18px;font-weight:600;margin:0;display:flex;align-items:center;gap:10px;line-height:1.4}.drawer-title .tag{font-size:11px;font-weight:400;padding:2px 7px;background:#f0f5ff;color:#2f54b9;border-radius:10px;white-space:nowrap}.drawer-close{width:22px;height:22px;border:0;background:transparent;font-size:18px;color:#a8abb2;padding:0;flex-shrink:0}.drawer-close:hover{color:#606266}.drawer-body{flex:1;overflow:auto;padding:18px 24px 20px}.drawer-footer{padding:14px 24px;border-top:1px solid #f0f0f0;background:white;display:flex;justify-content:flex-end;gap:12px;min-height:61px}
+  .section{margin-bottom:28px}.section:last-child{margin-bottom:0}.section-title{font-size:15px;font-weight:600;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;line-height:1.5}.section-note{font-size:11px;font-weight:400;color:#909399;margin-left:auto}.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:22px 16px}.form-grid-2 .form-item{gap:8px}
+  .readonly-tip{padding:10px 12px;background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;color:#909399;margin-bottom:18px}.hint{font-size:11px;color:#909399;line-height:1.8;margin-top:9px}.field-help{font-size:11px;color:#909399;margin:0}.employee-lookup{margin-bottom:24px}.employee-lookup>label{display:block;color:#606266;margin-bottom:8px}.lookup-row{display:flex;gap:12px}.lookup-row .input{flex:1}.lookup-feedback{margin-top:6px;min-height:0;font-size:11px;line-height:1.6;color:#606266}.lookup-feedback[data-kind=error]{color:#f56c6c}.lookup-feedback[data-kind=success]{color:#67c23a}.lookup-feedback:empty{display:none}
+  .mode-switch{display:inline-flex;background:#f4f4f5;padding:4px;border-radius:8px;gap:0}.mode-switch button{height:34px;min-width:112px;padding:0 15px;border:0;border-radius:6px;color:#606266;background:transparent}.mode-switch button.active{background:white;color:#337ecc;font-weight:600;box-shadow:0 1px 4px #00000008}.quota-panel{margin-top:14px}.quota-editor{border:1px solid #ebeef5;border-radius:7px;overflow:hidden}.quota-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.48fr) 42px;border-bottom:1px solid #f0f0f0}.quota-row.header{background:#fafafa;color:#606266;font-weight:600}.quota-row.header>div{padding:12px}.quota-row input{width:100%;border:0;border-right:1px solid #f0f0f0;background:white;padding:13px 11px;color:#303133;outline:none;line-height:20px}.quota-row input:focus{background:#f4f9ff}.quota-row input::placeholder{color:#c0c4cc}.quota-del{border:0;background:white;color:#b1b3b8;padding:0;font-size:16px}.quota-del:hover{background:#fef0f0;color:#f56c6c}.quota-add{padding:11px 14px;background:white}.quota-add button{height:24px;font-size:12px}.quota-json{resize:vertical;min-height:220px;padding:12px;font:12px/1.8 ui-monospace,Consolas,monospace;white-space:pre;tab-size:2}
+  .switch-control{display:inline-flex;align-items:center;gap:9px;cursor:pointer}.switch-control input{position:absolute;opacity:0;width:1px;height:1px}.switch-track{position:relative;width:60px;height:22px;border-radius:11px;background:#bfbfbf;transition:background .15s;color:white;font-size:11px;line-height:22px;text-align:right;padding-right:7px}.switch-track:after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:white;box-shadow:0 1px 2px #0002;transition:left .15s}.switch-control input:checked+.switch-track{background:#409eff;text-align:left;padding-left:7px;padding-right:0}.switch-control input:checked+.switch-track:after{left:41px}.switch-control input:focus-visible+.switch-track{outline:2px solid #409eff;outline-offset:3px}.switch-description{color:#909399;font-size:11px}
+  .desc-grid{display:grid;grid-template-columns:110px 1fr;margin:0;gap:15px 16px;font-size:12px}.desc-grid dt{color:#909399}.desc-grid dd{margin:0;overflow-wrap:anywhere}.code-block{background:#fafafa;border:1px solid #ebeef5;border-radius:6px;padding:14px;color:#606266;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;margin:0;font-size:12px}
+  .warn-box{padding:10px 12px;background:#fdf6ec;border:1px solid #faecd8;border-radius:4px;color:#b88230;font-size:12px;line-height:1.8;margin-bottom:16px}.scope-preview{padding:12px 14px;background:#f4f9ff;border:1px solid #d9ecff;border-radius:5px;margin-top:16px;line-height:1.8;color:#606266}.scope-preview strong{font-size:22px;color:#409eff;margin:0 4px;font-weight:600}.scope-preview .muted{color:#909399;font-size:11px}.inline-error{padding:9px 12px;margin-top:14px;border:1px solid #fde2e2;border-radius:4px;background:#fef0f0;color:#f56c6c;font-size:12px;line-height:1.7}
+  .tree-select,.dept-picker{position:relative;min-width:0}.dept-picker>summary{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;background-image:none;padding-right:48px}.dept-picker>summary::-webkit-details-marker{display:none}.dept-picker>summary:after{content:'⌄';position:absolute;right:11px;color:#a8abb2}.picker-value{display:flex;align-items:center;gap:5px;min-width:0}.picker-tag{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.picker-more{border:1px solid #e4e7ed;border-radius:3px;background:#f5f7fa;color:#606266;padding:0 5px;font-size:11px;flex-shrink:0}.dept-picker>summary.is-empty{color:#a8abb2}.dept-picker[open]>summary{border-color:#409eff}.picker-clear{position:absolute;right:26px;top:8px;width:16px;height:16px;padding:0;border:0;border-radius:50%;background:#f4f4f5;color:#909399;font-size:13px;line-height:16px}.picker-clear:hover{color:#606266;background:#e4e7ed}.dept-popup{position:absolute;top:38px;left:0;width:max(100%,330px);max-width:min(440px,calc(100vw - 52px));background:white;border:1px solid #e4e7ed;border-radius:5px;box-shadow:0 4px 16px #00000018;padding:9px;z-index:40}.dept-options{max-height:280px;overflow:auto;margin-top:6px}.tree-list,.tree-list ul{list-style:none;margin:0;padding:0}.tree-list ul{padding-left:20px}.tree-row{display:flex;align-items:center;gap:5px;min-height:30px;border-radius:3px;padding:2px 4px}.tree-row:hover{background:#f5f7fa}.tree-row:has(input:checked){color:#337ecc}.tree-toggle,.tree-spacer{width:17px;flex:0 0 17px}.tree-toggle{height:22px;padding:0;border:0;background:transparent;color:#909399;font-size:13px}.tree-toggle:hover{color:#409eff}.tree-toggle.open{transform:rotate(90deg)}.tree-check{display:flex;align-items:center;gap:7px;min-width:0;flex:1;cursor:pointer}.tree-check input{accent-color:#409eff;width:14px;height:14px;margin:0;flex-shrink:0}.tree-check span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree-check small{color:#a8abb2;font-size:10px;white-space:nowrap;margin-left:auto}.tree-check:has(input:disabled){color:#a8abb2;cursor:default}.tree-caption{font-size:11px;color:#909399;line-height:1.6;padding:7px 2px 0;border-top:1px solid #f0f0f0;margin-top:6px}.dept-empty{padding:18px 8px;text-align:center;color:#909399}.scope-departments{font-size:11px;color:#606266;max-height:90px;overflow:auto;margin-top:6px;white-space:normal}.scope-list{margin:0;padding-left:16px}
+  .modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:480px;max-width:calc(100vw - 32px);max-height:90vh;overflow:auto;background:white;border:1px solid #ebeef5;border-radius:6px;box-shadow:0 10px 40px #0002;z-index:104;opacity:0;pointer-events:none;transition:opacity .16s,transform .16s}.modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}#confirmMask{z-index:103}.modal-body{padding:22px 24px 12px}.modal-title{font-size:17px;font-weight:600;margin:0 0 12px}.modal-desc{font-size:12px;color:#606266;margin:0;line-height:1.8}.modal-footer{padding:12px 24px 20px;display:flex;justify-content:flex-end;gap:10px}.confirm-details{display:grid;grid-template-columns:90px 1fr;gap:8px 12px;margin:16px 0}.confirm-details dt{color:#909399}.confirm-details dd{margin:0;overflow-wrap:anywhere}.confirm-quota{padding:11px 12px;background:#fafafa;border:1px solid #ebeef5;border-radius:4px;white-space:pre-wrap;max-height:210px;overflow:auto;line-height:1.7;font-size:12px;margin:0}
+  .toast-wrap{position:fixed;top:58px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:300;pointer-events:none}.toast{background:white;border:1px solid #e4e7ed;box-shadow:0 3px 12px #00000012;border-radius:5px;padding:10px 16px;color:#606266;max-width:calc(100vw - 32px)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .tbl td:last-child{position:sticky;right:0;z-index:1;background:white;box-shadow:-4px 0 6px -6px #909399}.tbl th:last-child{position:sticky;right:0;z-index:2;background:#fafafa}
+  .drawer:not(.show),.modal:not(.show){visibility:hidden}
+  @media(min-width:1700px){.tbl th:nth-child(6){width:27%}.tbl th:nth-child(4){width:14%}.tbl th:nth-child(8){width:12%}.tbl th:nth-child(5){width:10%}}
+  @media(max-width:1180px){.filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filter-actions{justify-content:flex-end}.topbar{gap:12px}.top-meta{gap:10px}.preview-label{display:none}}
+  @media(max-width:900px){.topbar{flex-wrap:wrap;padding:8px 12px 0;gap:7px 12px}.top-meta{order:1}.page-tabs{order:2;width:100%;height:34px}.side-item{height:34px;flex:1;padding:0 10px}.overview-bottom{grid-template-columns:1fr}}
+  @media(max-width:720px){.brand{font-size:12px}.top-meta{font-size:11px}.main{padding:12px 10px 20px}.change-overview{padding:18px 12px 24px}.overview-heading{flex-wrap:wrap;gap:6px 10px}.overview-heading h1{font-size:19px}.overview-lead{margin-bottom:16px}.comparison-table th,.comparison-table td{padding:12px}.overview-panel{padding:14px}.overview-bottom{gap:14px;margin-top:16px}.page-header{display:block}.page-desc{gap:3px 10px}.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.filter-actions{justify-content:flex-start;align-self:end}.filter-extra{flex-wrap:wrap;gap:5px 10px}.action-bar{flex-wrap:wrap}.action-bar .btn{padding:0 11px}.drawer{width:100vw}.drawer-header{padding:16px}.drawer-body{padding:16px}.drawer-footer{padding:12px 16px}.drawer-title{font-size:16px;gap:7px}.section-note{display:none}.pager{justify-content:flex-start;flex-wrap:wrap;gap:7px}.status-line>span{min-width:180px}.dept-popup{width:max(100%,240px)}.form-grid-2{gap:18px 12px}.quota-row{grid-template-columns:minmax(0,1fr) minmax(100px,.55fr) 36px}}
+  @media(max-width:430px){.side-item{font-size:11px;padding:0 7px}.filter-grid{grid-template-columns:1fr 1fr}.filter-grid>.department-filter{grid-column:1 / -1}.form-grid-2{grid-template-columns:1fr}.desc-grid{grid-template-columns:90px 1fr;gap:12px}.drawer-title .tag{font-size:10px}.lookup-row{gap:8px}.lookup-row .btn{padding:0 10px}.mode-switch button{min-width:100px}}
+  @media(max-width:720px){#qUsers .dept-popup{left:auto;right:0}.pager-controls{min-width:0}.page-numbers{flex-wrap:wrap}}
+  @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 
-  :root{
-    --brand:#2b5cff; --brand-hover:#1d4ae8; --brand-soft:#eaf0ff; --brand-soft-2:#f4f7ff;
-    --border:#e5e6eb; --border-2:#c9cdd4; --text-1:#1f2329; --text-2:#4e5969; --text-3:#86909c;
-    --bg:#f5f6f8; --card:#fff; --hover:#f7f8fa; --success:#00b42a; --success-soft:#e8ffea;
-    --warning:#ff7d00; --warning-soft:#fff7e8; --danger:#f53f3f; --danger-soft:#ffece8;
-    --shadow-sm:0 1px 2px rgba(0,0,0,.04); --shadow:0 8px 24px rgba(0,0,0,.10);
-    --radius:8px; --radius-lg:12px;
-  }
-  .topbar{
-    height:56px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;
-    padding:0 20px;position:sticky;top:0;z-index:20;
-  }
-  .brand{display:flex;align-items:center;gap:12px;font-weight:700;color:var(--text-1)}
-  .brand-logo{
-    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-hover));
-    display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 2px 8px rgba(43,92,255,.18);
-  }
-
-  .layout{display:flex;min-height:calc(100vh - 56px)}
-  .sidebar{
-    width:236px;background:#fff;border-right:1px solid var(--border);padding:16px 12px;flex-shrink:0;
-  }
-  .side-title{
-    padding:8px 12px 12px;font-size:11px;color:var(--text-3);font-weight:700;letter-spacing:1px;text-transform:uppercase;
-  }
-  .side-item{
-    width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-2);
-    margin-bottom:4px;text-align:left;transition:all .16s;
-  }
-  .side-item:hover{background:var(--hover);color:var(--text-1)}
-  .side-item.active{background:var(--brand-soft);color:var(--brand);font-weight:700}
-  .side-item .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.65}
-  .side-desc{
-    padding:12px;margin-top:14px;border:1px dashed var(--border-2);border-radius:10px;background:#fafbfc;
-    font-size:12px;line-height:1.65;color:var(--text-3);
-  }
-  .side-doc-link{margin-top:10px;font-size:12px;line-height:1.6;color:var(--text-3)}
-  .side-doc-link a{color:#1d4ed8;text-decoration:underline;overflow-wrap:anywhere;word-break:break-all}
-
-  .main{flex:1;min-width:0;max-width:1440px;padding:20px 24px 40px}
-  .page-header{margin-bottom:16px}
-  .page-title{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--text-1)}
-  .page-desc{
-    margin-top:8px;display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px;
-    padding:8px 12px;border:1px solid #ffd0c9;border-left:4px solid var(--danger);
-    border-radius:8px;background:#fff7f5;color:var(--text-2);line-height:1.6;
-  }
-  .page-desc-alert{color:var(--danger);font-weight:800}
-  .page-desc-muted{color:var(--text-2)}
-  .page-note{
-    margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#fff;
-    font-size:12.5px;color:var(--text-3);line-height:1.7;
-  }
-  .page-note b{color:var(--text-2)}
-
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
-  .card + .card{margin-top:16px}
-
-  .filter-bar{padding:18px 20px 8px}
-  .filter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px 16px}
-  .form-item{display:flex;flex-direction:column;gap:6px}
-  .form-item label{font-size:12.5px;color:var(--text-2);font-weight:600}
-  .req{color:var(--danger);margin-right:2px}
-  .input,.select,textarea{
-    width:100%;height:36px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-1);
-    outline:none;transition:border-color .15s,box-shadow .15s;
-  }
-  textarea{height:auto;padding:10px 11px;min-height:110px;resize:vertical}
-  .input:hover,.select:hover,textarea:hover{border-color:var(--border-2)}
-  .input:focus,.select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(43,92,255,.10)}
-  .select{
-    appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23c9cdd4' d='M5 6 0 0h10z'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;
-  }
-  .readonly{
-    background:#f2f3f5 !important;border-color:#d9dde4 !important;color:#6b7280 !important;cursor:not-allowed;
-  }
-  .readonly:focus{box-shadow:none !important}
-  .field-meta{font-size:12px;color:var(--text-3)}
-  .field-meta.badge{
-    display:inline-flex;align-items:center;gap:4px;background:#f2f3f5;border-radius:999px;padding:2px 8px;font-size:11px;
-  }
-  .field-error .input,.field-error .select,.field-error textarea{border-color:var(--danger) !important}
-  .field-error-msg{font-size:12px;color:var(--danger);margin-top:4px}
-
-  .filter-actions{
-    display:flex;justify-content:flex-end;gap:10px;padding:12px 20px 18px;border-top:1px dashed var(--border);margin-top:10px;
-  }
-  .action-bar{display:flex;align-items:center;gap:10px;padding:14px 0 0}
-
-  .btn{
-    height:36px;padding:0 14px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
-    font-size:13px;font-weight:600;transition:all .15s;white-space:nowrap;
-  }
-  .btn-primary{background:var(--brand);color:#fff}
-  .btn-primary:hover{background:var(--brand-hover)}
-  .btn-default{background:#fff;border:1px solid var(--border);color:var(--text-2)}
-  .btn-default:hover{border-color:var(--brand);color:var(--brand)}
-  .btn-danger{background:#fff;border:1px solid var(--border);color:var(--danger)}
-  .btn-danger:hover{background:var(--danger-soft);border-color:var(--danger)}
-  .btn-text{height:auto;padding:0 6px;color:var(--brand);font-weight:600}
-  .btn-text.danger{color:var(--danger)}
-  button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-
-  .toolbar{
-    padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;
-  }
-  .toolbar-left{display:flex;align-items:center;gap:10px}
-  .toolbar-title{font-size:15px;font-weight:700;color:var(--text-1)}
-  .toolbar-summary{font-size:12.5px;color:var(--text-3)}
-  .toolbar-summary strong{color:var(--brand)}
-  .active-filters{padding:0 20px 12px;display:flex;flex-wrap:wrap;gap:8px}
-  .filter-chip{
-    padding:4px 10px;border-radius:999px;background:#f7f8fa;border:1px solid var(--border);font-size:12px;color:var(--text-2);
-  }
-
-  .table-wrap{overflow:auto}
-  table.tbl{width:100%;border-collapse:separate;border-spacing:0}
-  .tbl th,.tbl td{
-    padding:16px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap;
-  }
-  .tbl th{font-size:12.5px;color:var(--text-2);font-weight:700;background:#fafbfc;position:sticky;top:0;z-index:1}
-  .tbl tbody tr:hover{background:var(--brand-soft-2)}
-  .tbl .id-cell,.tbl .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--text-2)}
-  .tbl .username-cell{font-weight:600;color:var(--text-1)}
-  .json-inline{
-    min-width:240px;max-width:620px;padding:8px 10px;border-radius:6px;
-    background:#f7f8fa;border:1px solid var(--border);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--text-2);
-    white-space:normal;word-break:break-all;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  }
-  .badge{
-    display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;line-height:18px;
-  }
-  .badge-success{background:var(--success-soft);color:var(--success)}
-  .badge-muted{background:#f2f3f5;color:var(--text-3)}
-  .badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
-
-  .pager{
-    padding:14px 20px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text-2);
-  }
-  .pager-controls{display:flex;align-items:center;gap:6px}
-  .pager-controls button{
-    min-width:32px;height:32px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text-2);transition:all .15s;
-  }
-  .pager-controls button:hover:not(:disabled){color:var(--brand);border-color:var(--brand)}
-  .pager-controls button.active{background:var(--brand);border-color:var(--brand);color:#fff}
-  .pager-controls button:disabled{opacity:.4;cursor:not-allowed}
-
-  .empty{padding:56px 20px;text-align:center;color:var(--text-3)}
-  .empty-title{font-size:14px;color:var(--text-2);margin-bottom:6px}
-  .empty-desc{font-size:12.5px}
-
-  .mask{
-    position:fixed;inset:0;background:rgba(0,0,0,.38);backdrop-filter:blur(2px);z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;
-  }
-  .mask.show{opacity:1;pointer-events:auto}
-  .drawer{
-    position:fixed;top:0;right:0;bottom:0;width:620px;max-width:92vw;background:#fff;z-index:101;display:flex;flex-direction:column;
-    transform:translateX(100%);transition:transform .26s cubic-bezier(.22,.61,.36,1);box-shadow:-8px 0 32px rgba(0,0,0,.12);
-  }
-  .drawer.show{transform:translateX(0)}
-  .drawer-header{
-    padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;
-  }
-  .drawer-title{font-size:16px;font-weight:700;color:var(--text-1);display:flex;align-items:center;gap:8px}
-  .drawer-title .tag{padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:600}
-  .drawer-close{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;color:var(--text-3)}
-  .drawer-close:hover{background:var(--hover);color:var(--text-1)}
-  .drawer-body{flex:1;overflow:auto;padding:20px}
-  .drawer-footer{
-    padding:12px 20px;border-top:1px solid var(--border);background:#fafbfc;display:flex;justify-content:flex-end;gap:10px;
-  }
-
-  .section{margin-bottom:20px}
-  .section-title{
-    font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border);
-    display:flex;align-items:center;gap:8px;
-  }
-  .section-note{font-size:12px;color:var(--text-3);font-weight:500;margin-left:auto}
-  .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
-  .desc-grid{display:grid;grid-template-columns:110px 1fr;gap:14px 16px}
-  .desc-grid dt{font-size:12.5px;color:var(--text-3)}
-  .desc-grid dd{font-size:13px;color:var(--text-1);word-break:break-all}
-  .readonly-tip{
-    padding:10px 12px;border-radius:8px;background:#f7f8fa;border:1px solid var(--border);font-size:12.5px;color:var(--text-3);margin-bottom:12px;
-  }
-  .warn-box{
-    padding:12px 14px;border-radius:10px;background:var(--warning-soft);border:1px solid #ffd8a8;font-size:12.5px;color:#9b5d00;line-height:1.7;
-  }
-
-  .mode-switch{display:inline-flex;background:#f2f3f5;border-radius:8px;padding:3px;gap:3px}
-  .mode-switch button{
-    min-width:108px;height:30px;padding:0 12px;border-radius:6px;font-size:12.5px;color:var(--text-2);font-weight:600;
-  }
-  .mode-switch button.active{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-  .quota-panel{margin-top:12px}
-  .quota-editor{border:1px solid var(--border);border-radius:10px;overflow:hidden}
-  .quota-row{display:grid;grid-template-columns:1fr 160px 44px;border-bottom:1px solid var(--border)}
-  .quota-row:last-child{border-bottom:none}
-  .quota-row.header{background:#fafbfc}
-  .quota-row.header > div{padding:10px 12px;font-size:12px;color:var(--text-3);font-weight:700}
-  .quota-row input{border:none;border-right:1px solid var(--border);outline:none;padding:10px 12px}
-  .quota-row input:last-of-type{border-right:none}
-  .quota-row input:focus{background:var(--brand-soft-2)}
-  .quota-del{
-    display:grid;place-items:center;color:var(--text-3);transition:all .12s;
-  }
-  .quota-del:hover{background:var(--danger-soft);color:var(--danger)}
-  .quota-add{padding:10px 12px;background:#fafbfc;border-top:1px solid var(--border)}
-  .quota-add .btn-text{padding:0}
-  .quota-json{min-height:180px}
-  .hint{font-size:12px;color:var(--text-3);line-height:1.6;margin-top:8px}
-  .code-block{
-    background:#1f2329;color:#d4d4d4;border-radius:10px;padding:14px;white-space:pre-wrap;word-break:break-all;line-height:1.7;font-size:12.5px;
-  }
-  .toast-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-  .toast{
-    min-width:260px;background:#fff;border:1px solid var(--border);border-left:3px solid var(--brand);border-radius:8px;
-    box-shadow:var(--shadow);padding:10px 14px;font-size:13px;color:var(--text-1);animation:toastIn .24s;
-  }
-  .toast.success{border-left-color:var(--success)}
-  .toast.error{border-left-color:var(--danger)}
-  @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-
-  .switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
-  .switch input{position:absolute;opacity:0;pointer-events:none}
-  .switch .track{width:40px;height:22px;border-radius:11px;background:#c9cdd4;position:relative;transition:background .18s}
-  .switch .track::after{
-    content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;
-    transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.2)
-  }
-  .switch input:checked + .track{background:var(--brand)}
-  .switch input:checked + .track::after{transform:translateX(18px)}
-  .switch .label{font-size:13px;color:var(--text-2)}
-
-  .modal{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:420px;max-width:92vw;background:#fff;border-radius:12px;z-index:102;
-    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:var(--shadow);
-  }
-  .modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
-  .modal-body{padding:22px 22px 12px}
-  .modal-title{font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:10px}
-  .modal-desc{font-size:13px;color:var(--text-2);line-height:1.7}
-  .modal-footer{padding:12px 22px 18px;display:flex;justify-content:flex-end;gap:10px}
-
-  @media (max-width:1280px){.filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-  @media (max-width:960px){
-    .layout{display:block}
-    .sidebar{width:auto;border-right:none;border-bottom:1px solid var(--border)}
-    .filter-grid,.form-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-  }
-  @media (max-width:720px){
-    .main{padding:16px}
-    .filter-grid,.form-grid-2,.desc-grid{grid-template-columns:1fr}
-    .json-inline{max-width:240px}
-  }
-
-  [hidden]{display:none!important}
-  button:disabled{opacity:.45;cursor:not-allowed}
-  .topbar{justify-content:space-between;gap:12px}
-  .preview-label{font-size:12px;color:var(--text-3)}
-  .page-title .badge{font-size:11px;color:var(--brand);background:var(--brand-soft)}
-  .page-note{background:var(--brand-soft-2);color:var(--text-2);border-color:#dce5ff}
-  .review-rules{margin-top:10px;padding-top:10px;border-top:1px solid #dce5ff}
-  .review-rules summary{cursor:pointer;color:var(--brand);font-weight:600}
-  .review-rules p{margin-top:8px}
-  .action-bar{padding-bottom:14px}
-  .filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .check{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2);cursor:pointer}
-  .check input{accent-color:var(--brand);width:15px;height:15px;flex-shrink:0}
-  .filter-extra{display:flex;align-items:center;gap:16px;margin-top:14px;padding-bottom:4px}
-  .dept-picker{position:relative;min-width:0}
-  .dept-picker>summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;list-style:none;font-weight:400;font-size:13px}
-  .dept-picker>summary::-webkit-details-marker{display:none}
-  .dept-picker>summary{background-image:none;padding-right:11px}
-  .dept-picker>summary:after{content:'⌄';color:var(--text-3)}
-  .dept-picker>summary span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .dept-popup{position:absolute;top:42px;left:0;width:max(100%,280px);max-width:85vw;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:10px;z-index:40}
-  .dept-options{max-height:235px;overflow:auto;margin-top:8px}
-  .dept-option{display:block;width:100%;text-align:left;padding:9px;border-radius:6px;font-size:13px}
-  .dept-option:hover,.dept-option.selected{background:var(--brand-soft);color:var(--brand)}
-  .dept-root{font-weight:600}
-  .department-cell{min-width:150px;max-width:210px;white-space:normal!important;line-height:1.6}
-  .department-cell small{display:block;font-size:11px;color:var(--text-3)}
-  .tbl th,.tbl td{padding:14px 12px}
-  .tbl td.actions{position:sticky;right:0;background:white;box-shadow:-4px 0 6px -6px #86909c}
-  .tbl th:last-child{position:sticky;right:0;z-index:2}
-  .json-inline{min-width:210px;max-width:330px}
-  .status-line{padding:12px 16px;margin-bottom:14px;background:#f2faf4;border:1px solid #b7e8c4;border-radius:8px;line-height:1.7;font-size:13px;display:flex;justify-content:space-between;gap:12px}
-  .status-line button{align-self:flex-start;color:var(--text-3)}
-  .inline-error{color:#d03030;background:#fff3f1;border:1px solid #ffd0c9;padding:10px 12px;border-radius:8px;font-size:12.5px;line-height:1.7;margin-top:12px}
-  .quota-row input{width:100%;min-width:0;background:white;color:var(--text-1)}
-  .quota-row{grid-template-columns:minmax(0,1fr) minmax(100px,.65fr) 42px}
-  .quota-json{font-family:ui-monospace,Consolas,monospace;line-height:1.65;font-size:12.5px}
-  .scope-preview{padding:14px;background:var(--brand-soft-2);border:1px solid #dce5ff;border-radius:10px;font-size:13px;line-height:1.8;margin-top:16px}
-  .scope-preview strong{font-size:22px;color:var(--brand);margin:0 3px}
-  .scope-preview .muted{color:var(--text-3);font-size:12px}
-  .modal{width:480px;z-index:104;max-height:90vh;overflow:auto}
-  #confirmMask{z-index:103}
-  .confirm-details{display:grid;grid-template-columns:96px 1fr;gap:8px;font-size:13px;margin:12px 0}
-  .confirm-details dt{color:var(--text-3)}
-  .confirm-details dd{color:var(--text-1);overflow-wrap:anywhere}
-  .confirm-quota{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#f7f8fa;white-space:pre-wrap;max-height:200px;overflow:auto;font-size:12px;line-height:1.6}
-  .drawer .hint{margin-bottom:10px}
-  .drawer-body>.section:last-child{margin-bottom:0}
-  @media(max-width:1100px){.sidebar{width:210px}.main{padding:20px 18px}}
-  @media(max-width:960px){.sidebar{width:auto;padding:12px;display:flex;flex-wrap:wrap;gap:6px}.side-title,.side-desc,.side-doc-link{display:none}.side-item{width:auto;margin:0}.topbar{height:auto;min-height:56px;padding:12px 16px}.preview-label{font-size:11px}.layout{min-height:calc(100vh - 56px)}}
-  @media(max-width:600px){.filter-grid,.form-grid-2{grid-template-columns:1fr}.main{padding:16px 12px}.page-title{font-size:20px}.pager{align-items:flex-start;gap:12px;flex-direction:column}.preview-label{max-width:130px}.drawer{max-width:100vw;width:100vw}.section-note{display:none}.filter-extra{flex-wrap:wrap}.page-desc{font-size:12px}}
 </style>
 </head>
 <body>
+
 <div class="toast-wrap" id="toastWrap" role="status" aria-live="polite"></div>
 <div id="app">
   <header class="topbar">
-    <div class="brand"><div class="brand-logo">AI</div><div>AI生图管理员配置</div></div>
-    <span class="preview-label">二期交互原型 · 模拟数据 · 刷新恢复</span>
+    <div class="brand"><span class="brand-symbol" aria-hidden="true">✣</span>AI 生图 · 管理员配置</div>
+    <nav class="page-tabs" aria-label="切换原型评审页面">
+      <button class="side-item active" data-view="overview" aria-controls="changeOverview" aria-pressed="true">本期前端改动</button>
+      <button class="side-item" data-view="gen" data-version="gen" aria-controls="configurationPage" aria-pressed="false">美工管理员配置</button>
+      <button class="side-item" data-view="operation" data-version="operation" aria-controls="configurationPage" aria-pressed="false">运营管理员配置</button>
+    </nav>
+    <div class="top-meta"><span class="preview-label">二期交互原型 · 模拟数据</span><a href="README.md" target="_blank" rel="noopener noreferrer">当前 PRD ↗</a></div>
   </header>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="side-title">页面入口</div>
-      <button class="side-item" data-version="gen"><span class="dot"></span>美工管理员配置</button>
-      <button class="side-item active" data-version="operation"><span class="dot"></span>运营管理员配置</button>
-      <div class="side-desc">左侧导航用于对照两个独立页面。<br>正式产品仍保留独立入口，各自维护配置数据。</div>
-      <div class="side-doc-link"><a href="https://github.com/xuqiang97/ai_image_config_v2/blob/main/README.md" target="_blank" rel="noopener">查看产品需求文档 PRD ↗</a></div>
-      <div class="side-desc">演示提示<br>选择「销售部」后勾选「包含下级部门」，可查看运营一组和二组。<br><br>按「运营一组 + LinkFox」批量更新，可观察启用、停用配置的变化。</div>
-    </aside>
-    <main class="main">
-      <section class="page-header">
-        <h1 class="page-title"><span id="pageTitle">运营管理员配置</span><span class="badge">二期</span></h1>
-        <div class="page-desc"><span class="page-desc-alert">由指定管理员统一配置，其他人请勿动谢谢，</span><span class="page-desc-muted">排序默认按更新时间倒排</span></div>
-        <div class="page-note"><b>按当前所属部门管理人员额度。</b>兼管其他部门不改变个人归属；批量操作仅覆盖已有配置的 quota，包含停用配置，保留原启停状态。
-          <details class="review-rules"><summary>原型评审说明：新旧任务与异常处理</summary>
-            <p><b>人员归属：</b>通过生图用户ID查询当前所属部门，用于人员展示、部门筛选和批量更新范围；用户ID不是员工工号。</p>
-            <p><b>新旧任务：</b>新任务在实际发起时实时查询当前部门，并优先匹配本部门、再逐级查找最近上级部门的有效凭据。组织记录更新后，新任务自然使用新部门；已提交任务继续使用首次提交时绑定的原部门和凭据。</p>
-            <p><b>异常处理：</b>部门缺失或未配置生图凭据，仍可先保存人员额度配置。实际生图时若取不到有效部门，或本部门及上级部门均无有效凭据，任务直接判失败、记录具体原因并进入「已完成」，结果标记为失败。</p>
-            <p class="hint">以上为评审说明。原型仅演示管理员配置操作；实际生图和任务结果处理以配套 PRD 为准。</p>
-          </details>
+  <main>
+  <section class="main change-overview" id="changeOverview" aria-labelledby="overviewTitle">
+    <div class="overview-heading"><h1 id="overviewTitle">本期前端改动</h1><span class="review-tag">原型评审说明</span></div>
+    <p class="overview-lead">对照上线前现状查看本期变化，再切换到美工、运营页面体验最终交互。<br><span>此说明页仅用于原型评审；正式系统沿用两个独立的管理员配置入口。</span></p>
+    <div class="comparison-wrap">
+      <table class="comparison-table">
+        <caption class="sr-only">管理员配置页面上线前现状与本期效果对照</caption>
+        <thead><tr><th scope="col">页面位置</th><th scope="col">上线前现状</th><th scope="col">本期效果</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">查询区</th><td>通过用户名、appKey 等条件筛选配置。</td><td><p><strong>配置用户改为全公司组织树多选</strong>，按“全公司 → 各级部门 → 人员”选择，支持整组选中后取消个别人。</p><p>移除 appKey 筛选，保留用户ID、模型和启用状态。</p></td></tr>
+          <tr><th scope="row">列表与详情</th><td>展示个人配置中的 appKey。</td><td><p><strong>移除 appKey 展示，展示当前所属部门的完整路径。</strong></p><p>部门随当前组织记录读取，便于核对人员归属。</p></td></tr>
+          <tr><th scope="row">新增与编辑</th><td>在个人模型配置中维护 appKey、quota 和启停。</td><td><p><strong>移除 appKey 输入，所属部门只读展示。</strong></p><p>继续维护 quota 和启停；工号查询沿用现有功能，部门不随个人配置保存。</p></td></tr>
+          <tr><th scope="row">批量更新</th><td>按 appKey 匹配配置，批量更新额度。</td><td><p><strong>改为按部门多选联动＋模型，整份覆盖 quota。</strong></p><p>支持全公司或多个部门，展示联动后的部门范围及预计命中配置数，二次确认后更新。</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="overview-bottom">
+      <section class="overview-panel" aria-labelledby="retainedRulesTitle">
+        <h2 id="retainedRulesTitle">沿用规则与操作边界</h2>
+        <ul class="overview-rules">
+          <li>美工、运营保持独立配置范围；切换演示页面后恢复对应页面的默认查询状态。</li>
+          <li>工号查询、quota 的结构化／JSON 编辑及启停沿用现有功能；工号与用户ID分别使用，新增和批量额度初始为空。</li>
+          <li>批量更新仅覆盖当前页面、所选部门和模型的已有配置；范围去重，包含停用配置，保留启停，不新增人员配置。</li>
+          <li>全公司候选树不扩大实际查询和维护权限，沿用管理员配置页原有权限及既有特殊授权；部门缺失仍可保存个人额度配置。</li>
+        </ul>
+      </section>
+      <section class="overview-panel" aria-labelledby="demoSamplesTitle">
+        <h2 id="demoSamplesTitle">虚构演示人员</h2>
+        <table class="sample-table"><thead><tr><th scope="col">演示场景</th><th scope="col">工号</th><th scope="col">用户ID</th></tr></thead><tbody><tr><td>运营新增人员</td><td><code>600199</code></td><td><code>9199</code></td></tr><tr><td>美工新增人员</td><td><code>700199</code></td><td><code>8199</code></td></tr><tr><td>未匹配部门</td><td><code>600106</code></td><td><code>9106</code></td></tr></tbody></table>
+        <p class="overview-note">建议体验：按部门整组选人并取消个别人 → 单人新增、查看、编辑 → 多部门批量覆盖额度 → 切换另一业务页面。</p>
+      </section>
+    </div>
+    <p class="overview-footer">原型使用虚构数据，不连接真实接口；所有修改仅在当前页面生效，刷新恢复。任务凭据、异常处理和跨项目上线顺序详见<a href="README.md" target="_blank" rel="noopener noreferrer">当前 PRD</a>。</p>
+  </section>
+  <section class="main" id="configurationPage" aria-labelledby="pageTitle" hidden>
+    <h1 id="pageTitle" class="sr-only">运营管理员配置</h1>
+    <section class="page-header" aria-label="页面提示">
+      <div class="page-desc"><span class="page-desc-alert">由指定管理员统一配置，其他人请勿动谢谢！</span><span class="page-desc-muted">排序默认按更新时间倒序排列</span></div>
+    </section>
+    <section aria-label="查询条件">
+      <form id="searchForm">
+        <div class="filter-grid">
+          <div class="form-item"><label for="qUserId">用户ID</label><input class="input" id="qUserId" inputmode="numeric" placeholder="精确查询，如 7680"></div>
+          <div class="form-item"><label id="qUsersLabel">配置用户</label><div id="qUsers"></div></div>
+          <div class="form-item"><label for="qProvider">生图模型</label><select class="select" id="qProvider"></select></div>
+          <div class="form-item"><label for="qEnabled">启用状态</label><select class="select" id="qEnabled"><option value="">全部</option><option value="1">已启用</option><option value="0">已停用</option></select></div>
+          <div class="filter-actions"><button class="btn btn-primary" id="btnSearch" type="submit">搜 索</button><button class="btn" type="button" id="btnResetFilter">重 置</button></div>
         </div>
-      </section>
-      <section class="card" aria-label="查询条件">
-        <form id="searchForm">
-          <div class="filter-bar">
-            <div class="filter-grid">
-              <div class="form-item"><label for="qUserId">用户ID</label><input class="input" id="qUserId" placeholder="生图用户ID，非员工工号"></div>
-              <div class="form-item"><label for="qUserName">用户名</label><input class="input" id="qUserName" placeholder="请输入完整用户名"></div>
-              <div class="form-item"><label for="qProvider">生图模型</label><select class="select" id="qProvider"></select></div>
-              <div class="form-item"><label id="qDepartmentLabel">所属部门</label><div id="qDepartment"></div></div>
-              <div class="form-item"><label for="qEnabled">状态</label><select class="select" id="qEnabled"><option value="">全部</option><option value="1">已启用</option><option value="0">已停用</option></select></div>
-            </div>
-            <div class="filter-extra"><label class="check"><input type="checkbox" id="qChildren">包含下级部门</label><span class="field-meta">默认仅匹配所选部门直属人员</span></div>
-          </div>
-          <div class="filter-actions"><button class="btn btn-primary" type="submit">查询</button><button class="btn btn-default" type="button" id="btnResetFilter">重置</button></div>
-        </form>
-      </section>
-      <div class="action-bar"><button class="btn btn-primary" id="btnAdd">＋ 新增配置</button><button class="btn btn-default" id="btnBatch">按部门批量更新 quota</button></div>
-      <div class="status-line" id="resultBanner" role="status" hidden><span id="resultText"></span><button id="closeResult" aria-label="关闭操作结果">✕</button></div>
-      <section class="card" aria-label="配置列表">
-        <div class="toolbar"><div class="toolbar-left"><h2 class="toolbar-title">配置列表</h2><span class="toolbar-summary">共 <strong id="totalCount">0</strong> 条</span></div></div>
-        <div class="active-filters" id="activeFilters"></div>
-        <div class="table-wrap"><table class="tbl"><thead><tr><th>ID</th><th>用户ID</th><th>用户名</th><th>当前所属部门</th><th>生图模型</th><th>quota</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody id="tableBody"></tbody></table></div>
-        <div class="pager"><span id="pageInfo"></span><div class="pager-controls"><select class="select" id="pageSize" aria-label="每页条数" style="width:110px"><option value="20">20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select><button id="prevPage">上一页</button><span id="pageNumber"></span><button id="nextPage">下一页</button></div></div>
-      </section>
-    </main>
-  </div>
+      </form>
+    </section>
+    <div class="action-bar"><button class="btn btn-primary" id="btnAdd"><span class="action-icon" aria-hidden="true">＋</span>新增配置</button><button class="btn btn-primary" id="btnBatch"><span class="action-icon" aria-hidden="true">⇅</span>按部门批量更新 quota</button></div>
+    <div class="status-line" id="resultBanner" role="status" hidden><span id="resultText"></span><button class="btn-text" id="resultAction" hidden></button><button class="status-close" id="closeResult" aria-label="关闭操作结果">×</button></div>
+    <section class="card" aria-label="配置列表">
+      <div class="table-wrap"><table class="tbl"><caption class="sr-only">当前业务页面的用户模型配置</caption><thead><tr><th scope="col">ID</th><th scope="col">用户ID</th><th scope="col">用户名</th><th scope="col">当前所属部门</th><th scope="col">生图模型</th><th scope="col">quota</th><th scope="col">状态</th><th scope="col">更新时间</th><th scope="col">操作</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+      <div class="pager"><span id="pageInfo" aria-live="polite"></span><span id="totalCount" hidden></span><div class="pager-controls"><button id="prevPage" aria-label="上一页">‹</button><div id="pageNumbers" class="page-numbers" aria-label="页码"></div><button id="nextPage" aria-label="下一页">›</button><select class="select" id="pageSize" aria-label="每页条数"><option value="20">20 条/页</option><option value="50">50 条/页</option><option value="100">100 条/页</option></select><label class="page-jump" id="pageJumpWrap" hidden>跳至<input class="input" id="pageJump" inputmode="numeric" aria-label="跳转页码">页</label></div></div>
+    </section>
+  </section>
+  </main>
 </div>
+<div class="row-menu" id="rowMenu" role="menu" aria-label="配置操作" hidden><button type="button" role="menuitem" data-action="view">查看</button><button type="button" role="menuitem" data-action="edit">编辑</button><button type="button" role="menuitem" data-action="delete">删除</button></div>
 <div class="mask" id="drawerMask"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
-  <div class="drawer-header"><h2 class="drawer-title"><span id="drawerTitle"></span><span class="tag" id="drawerVersion"></span></h2><button class="drawer-close" id="closeDrawer" aria-label="关闭抽屉">✕</button></div>
+  <div class="drawer-header"><button class="drawer-close" id="closeDrawer" aria-label="关闭抽屉">×</button><h2 class="drawer-title"><span id="drawerTitle"></span><span class="tag" id="drawerVersion"></span></h2></div>
   <div class="drawer-body" id="drawerBody"></div>
-  <div class="drawer-footer"><button class="btn btn-default" id="cancelDrawer">取消</button><button class="btn btn-primary" id="submitDrawer">保存</button></div>
+  <div class="drawer-footer"><button class="btn" id="cancelDrawer">取 消</button><button class="btn btn-primary" id="submitDrawer">提 交</button></div>
 </aside>
 <div class="mask" id="confirmMask"></div>
 <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true" inert>
   <div class="modal-body"><h2 class="modal-title" id="confirmTitle"></h2><div id="confirmContent"></div></div>
-  <div class="modal-footer"><button class="btn btn-default" id="cancelConfirm">取消</button><button class="btn btn-primary" id="acceptConfirm">确认</button></div>
+  <div class="modal-footer"><button class="btn" id="cancelConfirm">取消</button><button class="btn btn-primary" id="acceptConfirm">确认</button></div>
 </div>
+
 <script>
+
 (() => {
   'use strict';
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const names={operation:'运营管理员配置',gen:'美工管理员配置'};
-  const providers=[['1','LinkFox（1）'],['2','自研（2）'],['3','阿里绘蛙（3，已停用）']];
+  const providers=[['1','LinkFox'],['2','自研'],['3','阿里绘蛙']];
   const providerName=id=>providers.find(p=>p[0]===String(id))?.[1]||id;
+  const providerDetail=id=>`${providerName(id)} (${id})`;
   const departments=[
     {id:'sales',name:'销售部',parent:''},{id:'ops1',name:'运营一组',parent:'sales'},{id:'ops2',name:'运营二组',parent:'sales'},
     {id:'design',name:'创意设计部',parent:''},{id:'art1',name:'美工一组',parent:'design'},{id:'art2',name:'美工二组',parent:'design'},
@@ -410,53 +168,117 @@
   const directory=[
     ['9101','示例用户01','ops1'],['9102','示例用户02','ops1'],['9103','示例用户03','ops2'],['9104','示例用户04','sales'],
     ['9105','示例用户05','product'],['9106','示例用户06',''],['9107','示例用户07','ops2'],['9199','示例新员工','ops1'],
-    ['8101','示例美工01','art1'],['8102','示例美工02','art1'],['8103','示例美工03','art2'],['8104','示例美工04','design']
-  ].map(([id,name,dept])=>({id,name,dept}));
+    ['8101','示例美工01','art1'],['8102','示例美工02','art1'],['8103','示例美工03','art2'],['8104','示例美工04','design'],['8199','示例美工新员工','art1']
+  ].map(([id,name,dept])=>({id,name,dept,employee:(id.startsWith('9')?'600':'700')+id.slice(-3)}));
   const department=id=>departments.find(d=>d.id===id);
-  const deptPath=id=>{const d=department(id);return d ? (d.parent?deptPath(d.parent)+' / ':'')+d.name : '未匹配部门';};
+  const deptPath=id=>{const d=department(id);return d ? (d.parent?deptPath(d.parent)+' > ':'全公司 > ')+d.name : '未匹配部门';};
   const user=id=>directory.find(u=>u.id===String(id));
   const deptOf=row=>user(row.userId)?.dept||'';
-  function inScope(actual,chosen,children){if(!chosen)return true;let d=department(actual);while(d){if(d.id===chosen)return true;if(!children)return false;d=department(d.parent);}return false;}
+  const descendantDepartments=id=>[id,...departments.filter(d=>d.parent===id).flatMap(d=>descendantDepartments(d.id))];
+  const summarizedDepartments=ids=>ids.filter(id=>!ids.includes(department(id)?.parent));
+  const isCompanyScope=ids=>departments.length>0&&departments.every(d=>ids.includes(d.id));
+  const departmentScopeText=ids=>isCompanyScope(ids)?`全公司（共 ${departments.length} 个部门）`:summarizedDepartments(ids).map(id=>deptPath(id)+(descendantDepartments(id).length>1?`（共 ${descendantDepartments(id).length} 个部门）`:'')).join('；');
   const order=['total','scene','closeUpWhite','closeUp','sellPoint','aplus'];
   const ordered=q=>[...q.filter(([k])=>order.includes(k)).sort((a,b)=>order.indexOf(a[0])-order.indexOf(b[0])),...q.filter(([k])=>!order.includes(k))];
   const quotaText=(q,pretty=false)=>'{'+(pretty?'\n':'')+ordered(q).map(([k,v])=>(pretty?'  ':'')+JSON.stringify(k)+': '+v).join(pretty?',\n':', ')+(pretty?'\n':'')+'}';
-  const defaultQuota=()=>[['total','1000'],['scene','3'],['closeUpWhite','0'],['closeUp','2'],['sellPoint','2'],['aplus','7']];
-  function record(id,uid,model,enabled,quota){return {id,userId:uid,userName:user(uid).name,provider:model,enabled,quota:quota||defaultQuota(),created:'2026-10-20 09:00:00',updated:`2026-10-22 10:${String(30-id%20).padStart(2,'0')}:00`};}
+  const sampleQuota=()=>[['total','1000'],['scene','3'],['closeUpWhite','0'],['closeUp','2'],['sellPoint','2'],['aplus','7']];
+  function record(id,uid,model,enabled,quota){return {id,userId:uid,userName:user(uid).name,provider:model,enabled,quota:quota||sampleQuota(),created:'2026-10-20 09:00:00',updated:`2026-10-22 10:${String(30-id%20).padStart(2,'0')}:00`};}
   const db={operation:[record(101,'9101','1',true),record(102,'9102','1',false,[['total','500'],['scene','2']]),record(103,'9101','2',true,[['total','60']]),record(104,'9103','1',true),record(105,'9104','1',true),record(106,'9105','1',true),record(107,'9106','1',false),record(108,'9107','3',false,[['total','16']])],gen:[record(201,'8101','1',true),record(202,'8102','1',false,[['total','200']]),record(203,'8103','1',true),record(204,'8101','2',true,[['total','60']]),record(205,'8104','1',true)]};
-  let version='operation',filters={},page=1,pageSize=20,queryDept,drawerMode='',editing=null,returnFocus=null,modalFocus=null,onConfirm=null,busy=false,editor,batchDept;
+  let pageView='overview',version='operation',filters={},page=1,pageSize=20,queryUsers,drawerMode='',editing=null,returnFocus=null,modalFocus=null,onConfirm=null,busy=false,editor,batchDept,menuRow=null,menuTrigger=null,resultContext=null,highlightIds=new Set(),queryToken=0;
   const now=()=>new Date().toLocaleString('sv-SE');
   const toast=message=>{const n=document.createElement('div');n.className='toast';n.textContent=message;$('#toastWrap').append(n);setTimeout(()=>n.remove(),4000);};
-  const options=(empty='全部')=>`<option value="">${empty}</option>`+providers.map(([id,n])=>`<option value="${id}">${n}</option>`).join('');
-  function departmentPicker(host,label,empty,changed){
-    const el=$(host);el.innerHTML=`<details class="dept-picker"><summary class="select" aria-labelledby="${label}"><span>${empty}</span></summary><div class="dept-popup"><input class="input" placeholder="搜索部门名称" aria-label="搜索部门名称"><div class="dept-options"></div></div></details>`;
-    const details=el.querySelector('details'),search=el.querySelector('input'),choices=el.querySelector('.dept-options');let chosen='';
-    function render(){const term=search.value.trim();choices.innerHTML=`<button class="dept-option" type="button" data-dept="">${empty}</button>`+departments.filter(d=>!term||deptPath(d.id).includes(term)).map(d=>`<button type="button" class="dept-option ${!d.parent?'dept-root':''} ${chosen===d.id?'selected':''}" data-dept="${d.id}" style="padding-left:${d.parent?26:9}px">${d.parent?'└ ':''}${esc(d.name)}</button>`).join('');}
-    function set(id){chosen=id;el.querySelector('summary span').textContent=id?deptPath(id):empty;render();}
-    choices.addEventListener('click',e=>{const b=e.target.closest('[data-dept]');if(!b)return;set(b.dataset.dept);details.open=false;el.querySelector('summary').focus();changed?.();});
-    search.addEventListener('input',render);details.addEventListener('toggle',()=>{if(details.open){search.value='';render();}});render();
-    return {get:()=>chosen,set};
+  const options=(empty='全部')=>`<option value="">${empty}</option>`+providers.map(([id,n])=>`<option value="${id}">${n}（${id}）</option>`).join('');
+
+  function candidateUsers(){
+    const result=new Map(directory.map(u=>[u.id,u]));
+    db[version].forEach(r=>{if(!result.has(r.userId))result.set(r.userId,{id:r.userId,name:r.userName,dept:''});});
+    return [...result.values()];
   }
-  function filteredRows(){return db[version].filter(r=>(!filters.uid||r.userId===filters.uid)&&(!filters.name||r.userName===filters.name)&&(!filters.provider||r.provider===filters.provider)&&(filters.enabled===undefined||filters.enabled===''||Number(r.enabled)===Number(filters.enabled))&&inScope(deptOf(r),filters.dept,filters.children)).sort((a,b)=>b.updated.localeCompare(a.updated)||b.id-a.id);}
+  const userLabel=id=>candidateUsers().find(u=>u.id===id)?.name||id;
+  function organizationPicker(host,label,mode,changed){
+    const people=mode==='people',empty=people?'请选择配置用户':'请选择部门（可多选）',searchLabel=people?'搜索部门或人员名称':'搜索部门名称',el=$(host);
+    el.classList.add('tree-select');
+    el.innerHTML=`<details class="dept-picker"><summary class="select is-empty" aria-labelledby="${label}"><span class="picker-value">${empty}</span></summary><div class="dept-popup"><input class="input" placeholder="${searchLabel}" aria-label="${searchLabel}" autocomplete="off"><div class="dept-options"></div><div class="tree-caption">${people?'搜索仅定位；勾选部门联动全部人员，可逐人调整。':'搜索仅定位；勾选部门仍联动完整下级范围。'}</div></div></details><button class="picker-clear" type="button" aria-label="${people?'清空配置用户':'清空所属部门'}" title="清空选择" hidden>×</button>`;
+    const details=el.querySelector('details'),search=el.querySelector('input'),choices=el.querySelector('.dept-options'),summary=el.querySelector('summary'),clear=el.querySelector('.picker-clear');
+    let chosen=new Set(),root,nodeMap=new Map();const expanded=new Set(['root']),searchCollapsed=new Set();
+    function build(){
+      const users=candidateUsers(),person=u=>({key:'u-'+u.id,kind:'person',id:u.id,name:u.name,dept:u.dept,children:[]});
+      const branch=d=>({key:'d-'+d.id,kind:'department',id:d.id,name:d.name,children:[...(people?users.filter(u=>u.dept===d.id).map(person):[]),...departments.filter(c=>c.parent===d.id).map(branch)]});
+      return {key:'root',kind:'root',name:'全公司',children:[...departments.filter(d=>!d.parent).map(branch),...(people?users.filter(u=>!department(u.dept)).map(person):[])]};
+    }
+    function values(n){return [...((people?n.kind==='person':n.kind==='department')?[n.id]:[]),...n.children.flatMap(values)];}
+    function normalize(n){
+      n.children.forEach(normalize);
+      if(!people&&n.kind==='department'&&n.children.length){if(n.children.every(c=>chosen.has(c.id)))chosen.add(n.id);else chosen.delete(n.id);}
+    }
+    function state(n){const ids=values(n),count=ids.filter(id=>chosen.has(id)).length;return {ids,checked:!!ids.length&&count===ids.length,mixed:count>0&&count<ids.length};}
+    function get(){return values(root).filter(id=>chosen.has(id));}
+    function isExpanded(n,term){return n.children.length>0&&(term?!searchCollapsed.has(n.key):expanded.has(n.key));}
+    function render(focusKey='',expandFocus=false){
+      const scroll=choices.scrollTop;root=build();nodeMap=new Map();const index=n=>{nodeMap.set(n.key,n);n.children.forEach(index);};index(root);
+      const allowed=new Set(values(root));chosen=new Set([...chosen].filter(id=>allowed.has(id)));normalize(root);
+      const term=search.value.trim().toLowerCase();
+      const matches=n=>!term||(n.kind!=='root'&&(n.name.toLowerCase().includes(term)||(n.kind==='department'?deptPath(n.id):deptPath(n.dept)).toLowerCase().includes(term)))||n.children.some(matches);
+      const row=n=>{
+        if(!matches(n))return '';const s=state(n),branch=n.children.length>0,open=isExpanded(n,term),title=n.kind==='person'?`${n.name}（用户ID ${n.id}） · ${deptPath(n.dept)}`:n.kind==='root'?'全公司':deptPath(n.id);
+        return `<li role="treeitem" aria-label="${esc(n.name)}" aria-checked="${s.mixed?'mixed':s.checked}" ${branch?`aria-expanded="${open}"`:''}><div class="tree-row">${branch?`<button class="tree-toggle ${open?'open':''}" type="button" data-expand="${n.key}" aria-label="${open?'收起':'展开'}${esc(n.name)}" aria-expanded="${open}">▸</button>`:'<span class="tree-spacer"></span>'}<label class="tree-check" title="${esc(title)}"><input type="checkbox" data-node-check="${n.key}" aria-label="选择${esc(n.name)}" ${s.checked?'checked':''} ${s.ids.length?'':'disabled'} data-mixed="${s.mixed}"><span>${esc(n.name)}</span>${people&&n.kind==='person'&&!department(n.dept)?'<small>未匹配部门</small>':''}</label></div>${open?`<ul role="group">${n.children.map(row).join('')}</ul>`:''}</li>`;
+      };
+      choices.innerHTML=matches(root)?`<ul class="tree-list" role="tree" aria-label="${people?'全公司组织树：选择配置用户':'全公司组织树：选择批量部门'}" aria-multiselectable="true">${row(root)}</ul>`:`<div class="dept-empty">${people?'未找到匹配的部门或人员':'未找到匹配部门'}</div>`;
+      choices.querySelectorAll('[data-mixed]').forEach(c=>c.indeterminate=c.dataset.mixed==='true');choices.scrollTop=scroll;
+      const ids=get(),labels=people?ids.map(userLabel):ids.map(deptPath);
+      summary.querySelector('.picker-value').innerHTML=!ids.length?empty:people?`<span class="picker-tag">${esc(labels[0])}</span>${ids.length>1?`<span class="picker-more">+ ${ids.length-1}</span>`:''}`:`<span class="picker-tag">${isCompanyScope(ids)?'全公司 · ':'已选 '}${ids.length} 个部门</span>`;
+      summary.classList.toggle('is-empty',!ids.length);if(!people)summary.title=labels.join('；')||empty;clear.hidden=!ids.length;
+      if(focusKey)choices.querySelector(`[${expandFocus?'data-expand':'data-node-check'}="${focusKey}"]`)?.focus({preventScroll:true});
+    }
+    choices.addEventListener('change',e=>{
+      const input=e.target.closest('[data-node-check]');if(!input)return;
+      for(const id of values(nodeMap.get(input.dataset.nodeCheck))){if(input.checked)chosen.add(id);else chosen.delete(id);}
+      render(input.dataset.nodeCheck);changed?.();
+    });
+    choices.addEventListener('click',e=>{const b=e.target.closest('[data-expand]');if(!b)return;const key=b.dataset.expand,states=search.value.trim()?searchCollapsed:expanded;if(states.has(key))states.delete(key);else states.add(key);render(key,true);});
+    search.addEventListener('input',()=>{searchCollapsed.clear();render();});search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();choices.querySelector('input:not(:disabled)')?.focus();}});
+    clear.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();chosen.clear();render();changed?.();summary.focus();});
+    details.addEventListener('toggle',()=>{if(details.open){$$('.dept-picker[open]').filter(d=>d!==details).forEach(d=>d.open=false);search.value='';render();}});
+    render();return {get,set:ids=>{chosen=new Set(ids||[]);search.value='';render();},close:()=>details.open=false};
+  }
+  function closeRowMenu(restore=false){const trigger=menuTrigger;$('#rowMenu').hidden=true;if(trigger?.isConnected)trigger.setAttribute('aria-expanded','false');menuRow=null;menuTrigger=null;if(restore&&trigger?.isConnected)trigger.focus();}
+  function openRowMenu(trigger,r){
+    if(menuRow?.id===r.id){closeRowMenu(true);return;}closeRowMenu();menuRow=r;menuTrigger=trigger;trigger.setAttribute('aria-expanded','true');
+    const menu=$('#rowMenu'),rect=trigger.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(8,Math.min(innerWidth-menu.offsetWidth-8,rect.right-menu.offsetWidth))+'px';menu.style.top=(rect.bottom+menu.offsetHeight+8>innerHeight?Math.max(8,rect.top-menu.offsetHeight-4):rect.bottom+4)+'px';menu.querySelector('button').focus();
+  }
+  function showResult(text,context){resultContext=context;$('#resultText').textContent=text;$('#resultBanner').hidden=false;$('#resultAction').hidden=!context;$('#resultAction').textContent=context?.kind==='batch'?'查看本次范围':'在列表中查看';}
+  function applyListScope(next){
+    queryToken++;$('#searchForm').inert=false;$('#btnSearch').textContent='搜 索';$('#btnSearch').disabled=false;
+    filters=next;page=1;$('#qUserId').value=next.uid||'';$('#qProvider').value=next.provider||'';$('#qEnabled').value=next.enabled??'';queryUsers.set(next.users||[]);queryUsers.close();renderList();
+  }
+  function showResultScope(){if(!resultContext)return;const c=resultContext;if(c.kind==='batch'){highlightIds=new Set(c.ids);applyListScope({users:c.users,provider:c.model});}else{highlightIds=new Set([c.id]);applyListScope({uid:c.uid,provider:c.model});$('#resultText').textContent=$('#resultText').textContent.replace('当前筛选条件未包含此配置，可在列表中查看。','已在列表中定位此配置。');}$('#resultAction').focus();}
+
+  function filteredRows(){return db[version].filter(r=>(!filters.uid||r.userId===filters.uid)&&(!filters.users?.length||filters.users.includes(r.userId))&&(!filters.provider||r.provider===filters.provider)&&(filters.enabled===undefined||filters.enabled===''||Number(r.enabled)===Number(filters.enabled))).sort((a,b)=>b.updated.localeCompare(a.updated)||b.id-a.id);}
+
+  function visiblePages(total,current){
+    const start=Math.max(1,Math.min(current-2,total-4)),numbers=[...new Set([1,...Array.from({length:Math.min(5,total)},(_,i)=>start+i),total])];
+    return numbers.flatMap((n,i)=>i&&n-numbers[i-1]>1?[0,n]:[n]);
+  }
   function renderList(){
-    const rows=filteredRows(),pages=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.min(page,pages);const start=(page-1)*pageSize;
-    $('#totalCount').textContent=rows.length;$('#pageInfo').textContent=`第 ${rows.length?start+1:0} - ${Math.min(start+pageSize,rows.length)} 条，共 ${rows.length} 条`;
-    $('#pageNumber').textContent=`${page} / ${pages}`;$('#prevPage').disabled=page===1;$('#nextPage').disabled=page===pages;
-    const chips=[];if(filters.uid)chips.push('用户ID：'+filters.uid);if(filters.name)chips.push('用户名：'+filters.name);if(filters.provider)chips.push(providerName(filters.provider));if(filters.dept)chips.push(deptPath(filters.dept)+(filters.children?'（含下级）':'（仅本部门）'));if(filters.enabled==='0'||filters.enabled==='1')chips.push(filters.enabled==='1'?'已启用':'已停用');
-    $('#activeFilters').innerHTML=chips.map(c=>`<span class="filter-chip">${esc(c)}</span>`).join('');$('#activeFilters').hidden=!chips.length;
-    $('#tableBody').innerHTML=rows.slice(start,start+pageSize).map(r=>{const d=department(deptOf(r));return `<tr><td class="id-cell">${r.id}</td><td class="mono">${r.userId}</td><td class="username-cell">${esc(r.userName)}</td><td class="department-cell">${esc(d?.name||'未匹配部门')}${d?.parent?`<small>${esc(deptPath(d.parent))}</small>`:''}</td><td>${esc(providerName(r.provider))}</td><td><div class="json-inline" title="${esc(quotaText(r.quota))}">${esc(quotaText(r.quota))}</div></td><td><span class="badge ${r.enabled?'badge-success':'badge-muted'}"><span class="dot"></span>${r.enabled?'已启用':'已停用'}</span></td><td class="mono">${r.updated}</td><td class="actions"><button class="btn-text" data-action="view" data-id="${r.id}">查看</button><button class="btn-text" data-action="edit" data-id="${r.id}">编辑</button><button class="btn-text danger" data-action="delete" data-id="${r.id}">删除</button></td></tr>`;}).join('')||'<tr><td colspan="9"><div class="empty"><div class="empty-title">暂无符合条件的配置</div><div class="empty-desc">请调整查询条件后重试</div></div></td></tr>';
+    closeRowMenu();const rows=filteredRows(),pages=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.max(1,Math.min(page,pages));const start=(page-1)*pageSize;
+    $('#totalCount').textContent=rows.length;$('#pageInfo').textContent=`共${rows.length}条`;
+    $('#pageNumbers').innerHTML=visiblePages(pages,page).map(n=>n?`<button type="button" data-page="${n}" aria-label="第 ${n} 页" ${n===page?'aria-current="page"':''}>${n}</button>`:'<span class="page-ellipsis" aria-hidden="true">•••</span>').join('');
+    $('#prevPage').disabled=page===1;$('#nextPage').disabled=page===pages;$('#pageJumpWrap').hidden=pages<=1;$('#pageJump').value='';
+    $('#tableBody').innerHTML=rows.slice(start,start+pageSize).map(r=>`<tr class="${highlightIds.has(r.id)?'is-highlighted':''}" data-record="${r.id}"><td class="id-cell">${r.id}</td><td class="mono">${r.userId}</td><td class="username-cell">${esc(r.userName)}</td><td class="department-cell" title="${esc(deptPath(deptOf(r)))}"><span class="dept-path">${esc(deptPath(deptOf(r)))}</span></td><td title="${esc(providerName(r.provider))}">${esc(providerName(r.provider))}</td><td><span class="json-inline" title="${esc(quotaText(r.quota))}">${esc(quotaText(r.quota))}</span></td><td><span class="badge ${r.enabled?'badge-success':'badge-muted'}"><span class="dot"></span>${r.enabled?'已启用':'已停用'}</span></td><td class="mono">${esc(r.updated)}</td><td><button class="row-action" data-row-menu="${r.id}" aria-label="操作：${esc(r.userName)}，${esc(providerName(r.provider))}" aria-haspopup="menu" aria-controls="rowMenu" aria-expanded="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 4h8M5 8h8M5 12h8"/><path d="M2 4h1M2 8h1M2 12h1" stroke-width="1.5"/></svg></button></td></tr>`).join('')||'<tr><td colspan="9"><div class="empty"><div class="empty-title">没有符合条件的配置</div><div class="empty-desc">请调整用户、模型或其他查询条件</div><button class="btn-text" type="button" data-reset-empty>重置查询条件</button></div></td></tr>';
   }
-  function resetFilters(){filters={};page=1;$('#searchForm').reset();queryDept.set('');renderList();}
+
+  function resetFilters(){highlightIds.clear();applyListScope({});}
   function openDrawer(mode,title){
     if(!$('#drawer').classList.contains('show'))returnFocus=document.activeElement;
-    drawerMode=mode;$('#drawerTitle').textContent=title;$('#drawerVersion').textContent=names[version];$('#drawerMask').classList.add('show');$('#drawer').classList.add('show');$('#drawer').inert=false;$('#drawer').setAttribute('aria-hidden','false');$('#app').inert=true;document.body.style.overflow='hidden';$('#drawerBody').scrollTop=0;$('#cancelDrawer').textContent=mode==='view'?'关闭':'取消';$('#submitDrawer').disabled=false;$('#closeDrawer').focus();
+    drawerMode=mode;$('#drawerBody').inert=false;$('#cancelDrawer').disabled=false;$('#closeDrawer').disabled=false;$('#drawer').removeAttribute('aria-busy');$('#drawerTitle').textContent=title;$('#drawerVersion').textContent=names[version];$('#drawerMask').classList.add('show');$('#drawer').classList.add('show');$('#drawer').inert=false;$('#drawer').setAttribute('aria-hidden','false');$('#app').inert=true;document.body.style.overflow='hidden';$('#drawerBody').scrollTop=0;$('#cancelDrawer').textContent=mode==='view'?'关 闭':'取 消';$('#submitDrawer').disabled=false;$('#closeDrawer').focus();
   }
-  function closeDrawer(restore=true){if(busy)return;$('#drawerMask').classList.remove('show');$('#drawer').classList.remove('show');$('#drawer').inert=true;$('#drawer').setAttribute('aria-hidden','true');$('#app').inert=false;document.body.style.overflow='';drawerMode='';if(restore&&returnFocus?.isConnected)returnFocus.focus();}
+  function closeDrawer(restore=true){if(busy)return;$('#drawerMask').classList.remove('show');$('#drawer').classList.remove('show');$('#drawer').inert=true;$('#drawer').setAttribute('aria-hidden','true');$('#app').inert=false;document.body.style.overflow='';drawerMode='';if(restore){if(returnFocus?.isConnected)returnFocus.focus();else $('#btnAdd').focus();}}
   function showConfirm(title,content,action,label='确认更新'){
     modalFocus=document.activeElement;onConfirm=action;$('#confirmTitle').textContent=title;$('#confirmContent').innerHTML=content;$('#acceptConfirm').textContent=label;$('#acceptConfirm').disabled=false;$('#confirmMask').classList.add('show');$('#confirmModal').classList.add('show');$('#confirmModal').inert=false;$('#confirmModal').setAttribute('aria-hidden','false');$('#drawer').inert=true;$('#app').inert=true;document.body.style.overflow='hidden';$('#cancelConfirm').focus();
   }
   function hideConfirm(restore=true){if(busy)return;$('#confirmMask').classList.remove('show');$('#confirmModal').classList.remove('show');$('#confirmModal').inert=true;$('#confirmModal').setAttribute('aria-hidden','true');const open=$('#drawer').classList.contains('show');$('#drawer').inert=!open;$('#app').inert=open;if(!open)document.body.style.overflow='';onConfirm=null;if(restore&&modalFocus?.isConnected)modalFocus.focus();}
-  function error(text){$('#drawerError').textContent=text;$('#drawerError').hidden=false;$('#drawerError').scrollIntoView({block:'nearest'});}
-  function clearError(){$('#drawerError').hidden=true;}
+  function error(text){if(!$('#drawerError'))return;$('#drawerError').textContent=text;$('#drawerError').hidden=false;$('#drawerError').scrollIntoView({block:'nearest'});}
+  function clearError(){if($('#drawerError'))$('#drawerError').hidden=true;}
   function validInteger(token){
     const m=/^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(token);if(!m)return false;
     const digits=m[2]+(m[3]||'');if(/^0+$/.test(digits))return true;if(m[1])return false;
@@ -471,50 +293,132 @@
   }
   function numberSignature(t){const m=/^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(t),all=(m[2]+(m[3]||'')).replace(/^0+/,'');if(!all)return '0';const zeros=all.match(/0*$/)[0].length;return all.slice(0,all.length-zeros)+'e'+(BigInt(m[4]||0)-BigInt((m[3]||'').length)+BigInt(zeros));}
   const quotaSignature=q=>JSON.stringify(q.map(([k,v])=>[k,numberSignature(v)]).sort((a,b)=>a[0].localeCompare(b[0])));
-  function quotaEditor(initial){
-    const host=$('#quotaHost');let mode='structured';host.innerHTML=`<div class="mode-switch"><button type="button" class="active" data-mode="structured">结构化填写</button><button type="button" data-mode="json">JSON填写</button></div><div class="quota-panel" id="structuredPanel"><div class="quota-editor"><div class="quota-row header"><div>字段 key</div><div>额度值</div><div></div></div><div id="quotaRows"></div><div class="quota-add"><button class="btn-text" id="addQuotaRow" type="button">＋ 新增 quota 字段</button></div></div></div><div class="quota-panel" id="jsonPanel" hidden><textarea class="input quota-json" id="quotaJson" aria-label="quota JSON" spellcheck="false"></textarea></div><div class="hint">quota 为非空对象；key 不可重复；额度值为非负整数，允许 0。<br>展示顺序：total → scene → closeUpWhite → closeUp → sellPoint → aplus。</div>`;
-    function row(k='',v=''){return `<div class="quota-row"><input aria-label="字段 key" value="${esc(k)}" placeholder="如 total"><input aria-label="额度值" value="${esc(v)}" inputmode="numeric" placeholder="非负整数"><button type="button" class="quota-del" aria-label="删除 quota 字段">×</button></div>`;}
-    function populate(q){$('#quotaRows').innerHTML=ordered(q).map(([k,v])=>row(k,v)).join('');$('#quotaJson').value=quotaText(q,true);}
-    function get(){if(mode==='json')return parseQuota($('#quotaJson').value);return checkEntries(Array.from($('#quotaRows').children).map(r=>Array.from(r.querySelectorAll('input')).map(i=>i.value.trim())));}
+  function quotaEditor(initial=[]){
+    const host=$('#quotaHost');let mode='structured';host.innerHTML=`<div class="mode-switch"><button type="button" class="active" data-mode="structured">结构化填写</button><button type="button" data-mode="json">JSON填写</button></div><div class="quota-panel" id="structuredPanel"><div class="quota-editor"><div class="quota-row header"><div>字段 key</div><div>额度值</div><div></div></div><div id="quotaRows"></div><div class="quota-add"><button class="btn-text" id="addQuotaRow" type="button">＋ 新增 quota 字段</button></div></div></div><div class="quota-panel" id="jsonPanel" hidden><textarea class="input quota-json" id="quotaJson" aria-label="quota JSON" spellcheck="false"></textarea></div><div class="hint">quota 必须为非空对象；字段 key 以字母或下划线开头，仅含字母、数字、下划线，不可重复。<br>额度值必须为非负整数，允许 0，不限上限；不接受字符串、布尔值、null、数组或嵌套对象。<br>展示顺序：total → scene → closeUpWhite → closeUp → sellPoint → aplus。</div>`;
+    function row(k='',v=''){return `<div class="quota-row"><input aria-label="字段 key" value="${esc(k)}" placeholder="如 total / scene / closeUp"><input aria-label="额度值" value="${esc(v)}" inputmode="numeric" placeholder="非负整数，不限上限"><button type="button" class="quota-del" aria-label="删除 quota 字段">×</button></div>`;}
+    function populate(q){$('#quotaRows').innerHTML=q.length?ordered(q).map(([k,v])=>row(k,v)).join(''):row();$('#quotaJson').value=quotaText(q,true);}
+    function get(allowEmpty=false){
+      if(mode==='json'){const raw=$('#quotaJson').value.trim();if(allowEmpty&&(!raw||/^\{\s*\}$/.test(raw)))return [];return parseQuota(raw);}
+      const entries=Array.from($('#quotaRows').children).map(r=>Array.from(r.querySelectorAll('input')).map(i=>i.value.trim()));
+      if(entries.every(([k,v])=>!k&&!v))return allowEmpty?[]:checkEntries([]);return checkEntries(entries);
+    }
     populate(initial);$('#addQuotaRow').onclick=()=>{$('#quotaRows').insertAdjacentHTML('beforeend',row());$('#quotaRows').lastElementChild.querySelector('input').focus();};
     $('#quotaRows').onclick=e=>{if(e.target.closest('.quota-del'))e.target.closest('.quota-row').remove();};
-    host.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{if(mode===b.dataset.mode)return;try{const q=get();populate(q);clearError();mode=b.dataset.mode;$('#structuredPanel').hidden=mode!=='structured';$('#jsonPanel').hidden=mode!=='json';host.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===mode));}catch(e){error(e.message);}});return {get};
+    host.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{if(mode===b.dataset.mode)return;try{const q=get(true);populate(q);clearError();mode=b.dataset.mode;$('#structuredPanel').hidden=mode!=='structured';$('#jsonPanel').hidden=mode!=='json';host.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===mode));}catch(e){error(e.message);}});return {get};
   }
-  function openView(r){editing=r;$('#drawerBody').innerHTML=`<section class="section"><div class="section-title">基本信息</div><dl class="desc-grid"><dt>用户ID</dt><dd>${r.userId}</dd><dt>用户名</dt><dd>${esc(r.userName)}</dd><dt>生图模型</dt><dd>${esc(providerName(r.provider))}</dd><dt>当前所属部门</dt><dd>${esc(deptPath(deptOf(r)))}</dd><dt>状态</dt><dd>${r.enabled?'已启用':'已停用'}</dd><dt>创建时间</dt><dd>${r.created}</dd><dt>更新时间</dt><dd>${r.updated}</dd></dl></section><section class="section"><div class="section-title">quota</div><pre class="code-block">${esc(quotaText(r.quota,true))}</pre></section>`;$('#submitDrawer').textContent='编辑';openDrawer('view','查看配置');}
+  function openView(r){editing=r;$('#drawerBody').innerHTML=`<section class="section"><div class="section-title">基本信息</div><dl class="desc-grid"><dt>ID</dt><dd>${r.id}</dd><dt>用户ID</dt><dd>${r.userId}</dd><dt>用户名</dt><dd>${esc(r.userName)}</dd><dt>生图模型</dt><dd>${esc(providerDetail(r.provider))}</dd><dt>当前所属部门</dt><dd>${esc(deptPath(deptOf(r)))}</dd><dt>启用状态</dt><dd>${r.enabled?'已启用':'已停用'}</dd><dt>创建时间</dt><dd>${r.created}</dd><dt>更新时间</dt><dd>${r.updated}</dd></dl></section><section class="section"><div class="section-title">quota JSON</div><pre class="code-block">${esc(quotaText(r.quota,true))}</pre></section>`;$('#submitDrawer').textContent='编 辑';openDrawer('view','查看配置');}
+
   function openForm(r=null){
-    editing=r;$('#drawerBody').innerHTML=`<section class="section"><div class="section-title">基本信息<span class="section-note">${r?'主标识字段只读':'新增用户模型配置'}</span></div><div class="form-grid-2"><div class="form-item"><label for="fUserId"><span class="req">*</span>用户ID</label><input class="input ${r?'readonly':''}" id="fUserId" ${r?'readonly':''} value="${r?.userId||''}" placeholder="生图用户ID，非员工工号"></div><div class="form-item"><label for="fProvider"><span class="req">*</span>生图模型</label><select class="select ${r?'readonly':''}" id="fProvider" ${r?'disabled':''}>${options('请选择')}</select></div><div class="form-item"><label for="fUserName"><span class="req">*</span>用户名</label><input class="input ${r?'readonly':''}" id="fUserName" ${r?'readonly':''} value="${esc(r?.userName||'')}" placeholder="请输入完整用户名"></div><div class="form-item"><label for="fDepartment">当前所属部门 <span class="field-meta badge">只读</span></label><input class="input readonly" id="fDepartment" readonly value="${r?esc(deptPath(deptOf(r))):'填写用户ID后显示'}"></div></div><div class="hint">部门按用户ID查询当前组织记录，在此处不可修改。未匹配到部门也可正常保存人员额度配置。${r?'':'原型可使用示例新员工 9199；示例用户 9106 未匹配部门。'}</div></section><section class="section"><div class="section-title">quota<span class="section-note">两种填写方式可切换</span></div><div id="quotaHost"></div></section><section class="section"><div class="section-title">启用状态</div><label class="check"><input id="fEnabled" type="checkbox" ${!r||r.enabled?'checked':''}>启用此用户模型配置</label><div class="hint">启用后仍须通过现有额度及生图配置检查。</div></section><div class="inline-error" id="drawerError" role="alert" hidden></div>`;
-    $('#fProvider').value=r?.provider||'';editor=quotaEditor(r?r.quota:defaultQuota());$('#submitDrawer').textContent='保存';openDrawer(r?'edit':'add',r?'编辑配置':'新增配置');
-    const updateOrg=()=>{const u=user($('#fUserId').value.trim());$('#fDepartment').value=u?deptPath(u.dept):'未匹配部门';if(u)$('#fUserName').value=u.name;};if(!r)$('#fUserId').addEventListener('input',updateOrg);
+    editing=r;
+    $('#drawerBody').innerHTML=`<section class="section"><div class="section-title">基本信息<span class="section-note">${r?'主标识字段仅用于展示，不可修改':'新增时填写基础主数据'}</span></div>${r?'<div class="readonly-tip">以下主标识字段仅用于展示，新增后不可修改。</div>':`<div class="employee-lookup"><label for="fEmployee">钉钉工号</label><div class="lookup-row"><input class="input" id="fEmployee" placeholder="请输入钉钉工号" inputmode="numeric" autocomplete="off"><button class="btn" id="lookupEmployee" type="button">查询用户</button></div><p class="hint">非必填，仅用于辅助查询用户信息；不保存到配置表。</p><div class="lookup-feedback" id="lookupFeedback" role="status" aria-live="polite"></div></div>`}<div class="form-grid-2"><div class="form-item"><label for="fUserId"><span class="req">*</span>用户ID${r?'<span class="field-meta badge">只读</span>':''}</label><input class="input ${r?'readonly':''}" id="fUserId" ${r?'disabled':''} value="${r?.userId||''}" inputmode="numeric" placeholder="请输入用户ID"></div><div class="form-item"><label for="fProvider"><span class="req">*</span>生图模型${r?'<span class="field-meta badge">只读</span>':''}</label><select class="select ${r?'readonly':''}" id="fProvider" ${r?'disabled':''}>${options('请选择')}</select></div><div class="form-item"><label for="fUserName"><span class="req">*</span>用户名${r?'<span class="field-meta badge">只读</span>':''}</label><input class="input ${r?'readonly':''}" id="fUserName" ${r?'disabled':''} value="${esc(r?.userName||'')}" placeholder="请输入完整用户名"></div><div class="form-item"><label for="fDepartment">当前所属部门<span class="field-meta badge">只读</span></label><input class="input readonly" id="fDepartment" readonly value="${r?esc(deptPath(deptOf(r))):'填写用户ID后显示'}"></div></div><div class="hint">部门按用户ID查询当前组织记录，在此处不可修改。</div></section><section class="section"><div class="section-title">quota<span class="section-note">支持结构化填写与 JSON 直填，提交前统一做合法性校验</span></div><div id="quotaHost"></div></section><section class="section"><div class="section-title">启用状态</div><label class="switch-control"><input id="fEnabled" type="checkbox" role="switch" aria-label="启用状态" ${!r||r.enabled?'checked':''}><span class="switch-track" id="enabledTrack">${!r||r.enabled?'已启用':'已停用'}</span><span class="switch-description" id="enabledDescription">${!r||r.enabled?'已启用（isEnabled = 1）':'已停用（isEnabled = 0）'}</span></label></section><div class="inline-error" id="drawerError" role="alert" hidden></div>`;
+    $('#fProvider').value=r?.provider||'';editor=quotaEditor(r?r.quota:[]);$('#submitDrawer').textContent='提 交';openDrawer(r?'edit':'add',r?'编辑配置':'新增配置');
+    $('#fEnabled').onchange=()=>{const enabled=$('#fEnabled').checked;$('#enabledTrack').textContent=enabled?'已启用':'已停用';$('#enabledDescription').textContent=enabled?'已启用（isEnabled = 1）':'已停用（isEnabled = 0）';};
+    $('#fDepartment').title=$('#fDepartment').value;
+    if(r)return;
+    const uid=$('#fUserId'),name=$('#fUserName'),employee=$('#fEmployee'),feedback=$('#lookupFeedback'),lookupButton=$('#lookupEmployee');let lastAutoName='',lookupSequence=0;
+    const updateOrg=()=>{const id=uid.value.trim(),u=user(id);$('#fDepartment').value=!id?'填写用户ID后显示':u?deptPath(u.dept):'未匹配部门';$('#fDepartment').title=$('#fDepartment').value;if(u){name.value=u.name;lastAutoName=u.name;}else if(name.value===lastAutoName){name.value='';lastAutoName='';}};
+    uid.addEventListener('input',()=>{updateOrg();feedback.textContent='';});
+    employee.addEventListener('input',()=>{feedback.textContent='';});
+    function lookup(){
+      const number=employee.value.trim();if(!number){feedback.dataset.kind='error';feedback.textContent='请输入钉钉工号后查询。';employee.focus();return;}if(lookupButton.disabled)return;
+      const seq=++lookupSequence,oldId=uid.value,oldName=name.value;feedback.textContent='';lookupButton.disabled=true;lookupButton.textContent='查询中…';$('#submitDrawer').disabled=true;
+      setTimeout(()=>{
+        if(seq!==lookupSequence||drawerMode!=='add'||$('#fEmployee')!==employee)return;
+        lookupButton.disabled=false;lookupButton.textContent='查询用户';$('#submitDrawer').disabled=false;
+        if(employee.value.trim()!==number||uid.value!==oldId||name.value!==oldName){feedback.dataset.kind='';feedback.textContent='输入已改变，请重新查询。';return;}
+        const match=directory.find(u=>u.employee===number);
+        if(!match){feedback.dataset.kind='error';feedback.textContent='未找到该工号对应的用户，已保留当前内容；可核对工号或手动填写用户ID和用户名。';return;}
+        uid.value=match.id;updateOrg();feedback.dataset.kind='success';feedback.textContent=`已回填 ${match.name}（用户ID：${match.id}）。`;clearError();
+      },400);
+    }
+    lookupButton.onclick=lookup;employee.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();lookup();}};
   }
-  function saveForm(){try{clearError();const uid=$('#fUserId').value.trim(),name=$('#fUserName').value.trim(),model=$('#fProvider').value;if(!/^\d+$/.test(uid))throw Error('请输入有效的数字用户ID。');if(!name)throw Error('请填写用户名。');if(!model)throw Error('请选择生图模型。');if(db[version].some(r=>r!==editing&&r.userId===uid&&r.provider===model))throw Error('当前页面已存在该用户的同模型配置，请编辑已有记录。');const quota=editor.get();if(editing){editing.quota=quota;editing.enabled=$('#fEnabled').checked;editing.updated=now();}else db[version].push({id:Math.max(...Object.values(db).flat().map(r=>r.id))+1,userId:uid,userName:name,provider:model,enabled:$('#fEnabled').checked,quota,created:now(),updated:now()});closeDrawer(false);renderList();$('#btnAdd').focus();toast('配置已保存（仅当前演示）');}catch(e){error(e.message);}}
-  function batchMatches(){return !batchDept.get()||!$('#bProvider').value?[]:db[version].filter(r=>r.provider===$('#bProvider').value&&inScope(deptOf(r),batchDept.get(),$('#bChildren').checked));}
-  function previewBatch(){clearError();const chosen=batchDept.get(),model=$('#bProvider').value;const rows=batchMatches();$('#scopePreview').innerHTML=!chosen||!model?'选择部门和生图模型后，显示预计命中配置数。':`预计命中 <strong>${rows.length}</strong> 条已有配置<br><span class="muted">其中已启用 ${rows.filter(r=>r.enabled).length} 条，已停用 ${rows.filter(r=>!r.enabled).length} 条。${rows.length?'未配置该模型的员工不计入。':'未命中任何记录，请调整范围。'}</span>`;}
+  function setDrawerBusy(value){busy=value;$('#drawerBody').inert=value;$('#submitDrawer').disabled=value;$('#cancelDrawer').disabled=value;$('#closeDrawer').disabled=value;$('#drawer').setAttribute('aria-busy',String(value));}
+  function saveForm(){
+    if(busy)return;
+    try{
+      clearError();const uid=$('#fUserId').value.trim(),name=$('#fUserName').value.trim(),model=$('#fProvider').value,enabled=$('#fEnabled').checked;
+      if(!/^\d+$/.test(uid))throw Error('请输入有效的数字用户ID。');if(!name)throw Error('请填写用户名。');if(!model)throw Error('请选择生图模型。');
+      if(db[version].some(r=>r!==editing&&r.userId===uid&&r.provider===model))throw Error('当前页面已存在该用户的同模型配置，请编辑已有记录。');
+      const quota=editor.get(),target=editing,scopeVersion=version;setDrawerBusy(true);$('#submitDrawer').textContent='提交中…';
+      setTimeout(()=>{
+        let saved=target;
+        if(saved){saved.quota=quota.map(p=>[...p]);saved.enabled=enabled;saved.updated=now();}
+        else{saved={id:Math.max(0,...Object.values(db).flat().map(r=>r.id))+1,userId:uid,userName:name,provider:model,enabled,quota:quota.map(p=>[...p]),created:now(),updated:now()};db[scopeVersion].push(saved);}
+        setDrawerBusy(false);closeDrawer(false);page=1;highlightIds=new Set([saved.id]);renderList();
+        const visible=filteredRows().some(r=>r.id===saved.id);
+        showResult(`已保存 ${saved.userName} · ${providerName(saved.provider)} 的配置。${visible?'': '当前筛选条件未包含此配置，可在列表中查看。'}`,{kind:'record',id:saved.id,uid:saved.userId,model:saved.provider});
+        $('#resultAction').focus();toast('配置已保存，仅在当前演示中生效。');
+      },350);
+    }catch(e){error(e.message);}
+  }
+
+  function batchMatches(){const selected=new Set(batchDept.get()),model=$('#bProvider').value;return !selected.size||!model?[]:db[version].filter(r=>r.provider===model&&selected.has(deptOf(r)));}
+  function previewBatch(){
+    clearError();const chosen=batchDept.get(),model=$('#bProvider').value,rows=batchMatches();
+    const scope=chosen.length?`<div class="scope-departments">联动后已选 ${chosen.length} 个部门：${esc(departmentScopeText(chosen))}</div>`:'';
+    $('#scopePreview').innerHTML=!chosen.length||!model?'选择部门和生图模型后，显示预计命中配置数。'+scope:`预计命中 <strong>${rows.length}</strong> 条已有配置<br><span class="muted">其中已启用 ${rows.filter(r=>r.enabled).length} 条，已停用 ${rows.filter(r=>!r.enabled).length} 条。${rows.length?'范围已去重，未配置该模型的员工不计入。':'未命中任何记录，请调整范围。'}</span>${scope}`;
+  }
   function openBatch(){
-    $('#drawerBody').innerHTML=`<section class="section"><div class="section-title">选择更新范围<span class="section-note">仅当前页面已有配置</span></div><div class="form-grid-2"><div class="form-item"><label id="bDepartmentLabel"><span class="req">*</span>所属部门</label><div id="bDepartment"></div></div><div class="form-item"><label for="bProvider"><span class="req">*</span>生图模型</label><select class="select" id="bProvider">${options('请选择')}</select></div></div><div class="filter-extra"><label class="check"><input type="checkbox" id="bChildren">包含下级部门</label></div><div class="scope-preview" id="scopePreview" role="status"></div></section><section class="section"><div class="section-title">统一设置 quota</div><div class="warn-box" style="margin-bottom:14px">将覆盖命中配置的<strong>完整 quota</strong>，原有但未填写的字段会被移除。<br>包含停用配置，保留原启停状态；不会为未配置的员工新增配置。</div><div id="quotaHost"></div></section><div class="inline-error" id="drawerError" role="alert" hidden></div>`;
-    batchDept=departmentPicker('#bDepartment','bDepartmentLabel','请选择部门',previewBatch);editor=quotaEditor(defaultQuota());$('#bProvider').onchange=previewBatch;$('#bChildren').onchange=previewBatch;$('#submitDrawer').textContent='预览并确认';openDrawer('batch','按部门批量更新 quota');previewBatch();
+    queryUsers.close();
+    $('#drawerBody').innerHTML=`<section class="section"><div class="section-title">选择更新范围<span class="section-note">仅当前业务页面已有配置</span></div><div class="form-grid-2"><div class="form-item"><label id="bDepartmentLabel"><span class="req">*</span>所属部门</label><div id="bDepartment"></div></div><div class="form-item"><label for="bProvider"><span class="req">*</span>生图模型</label><select class="select" id="bProvider">${options('请选择')}</select></div></div><div class="hint">按本抽屉选择的部门和模型更新，不受列表人员、用户ID、模型、状态筛选或分页限制。<br>未匹配部门的配置不计入部门批量范围。</div><div class="scope-preview" id="scopePreview" role="status"></div></section><section class="section"><div class="section-title">quota<span class="section-note">建议直接按完整对象理解与填写</span></div><div class="warn-box" style="margin-bottom:14px">将覆盖命中配置的<strong>完整 quota</strong>，原有但未填写的字段会被移除。<br>包含停用配置，保留原启停状态；不会为未配置的员工新增配置。</div><div id="quotaHost"></div></section><div class="inline-error" id="drawerError" role="alert" hidden></div>`;
+    batchDept=organizationPicker('#bDepartment','bDepartmentLabel','departments',previewBatch);editor=quotaEditor([]);$('#bProvider').onchange=previewBatch;$('#submitDrawer').textContent='预览并确认';openDrawer('batch','按部门批量更新 quota');previewBatch();
   }
-  function confirmBatch(){try{clearError();if(!batchDept.get())throw Error('请选择所属部门。');if(!$('#bProvider').value)throw Error('请选择生图模型。');const quota=editor.get(),rows=batchMatches();if(!rows.length)throw Error('未命中任何记录，请调整部门或模型，已保留当前输入。');
-    const scope=deptPath(batchDept.get()),children=$('#bChildren').checked,model=$('#bProvider').value;
-    showConfirm('确认批量覆盖 quota',`<p class="modal-desc">请核对本次更新范围及完整额度内容。</p><dl class="confirm-details"><dt>业务页面</dt><dd>${names[version]}</dd><dt>所属部门</dt><dd>${esc(scope)}</dd><dt>包含下级</dt><dd>${children?'是':'否，仅本部门'}</dd><dt>生图模型</dt><dd>${esc(providerName(model))}</dd><dt>预计命中</dt><dd>${rows.length} 条配置（含 ${rows.filter(r=>!r.enabled).length} 条停用配置）</dd></dl><pre class="confirm-quota">${esc(quotaText(quota,true))}</pre><div class="hint">覆盖完整 quota；不改变启停状态，不新增人员配置。</div>`,()=>{const current=batchMatches();if(current.length!==rows.length){hideConfirm();previewBatch();error('更新范围已变化，请重新确认。');return;}let modified=0;for(const r of current){if(quotaSignature(r.quota)!==quotaSignature(quota)){r.quota=quota.map(pair=>[...pair]);r.updated=now();modified++;}}hideConfirm(false);closeDrawer(false);renderList();$('#resultText').textContent=`批量更新完成：${scope} · ${providerName(model)} · ${children?'含下级':'仅本部门'}。匹配 ${current.length} 条，实际修改 ${modified} 条${current.length>modified?`（${current.length-modified} 条额度相同）`:''}；启停状态保持不变。`;$('#resultBanner').hidden=false;$('#btnBatch').focus();toast('批量更新完成（仅当前演示）');});
+  function confirmBatch(){try{clearError();if(!batchDept.get().length)throw Error('请选择所属部门。');if(!$('#bProvider').value)throw Error('请选择生图模型。');const quota=editor.get(),rows=batchMatches();if(!rows.length)throw Error('未命中任何记录，请调整部门或模型，已保留当前输入。');
+    const departmentsSelected=batchDept.get(),scope=departmentScopeText(departmentsSelected),model=$('#bProvider').value;batchDept.close();
+    showConfirm('确认批量覆盖 quota',`<p class="modal-desc">请核对联动后的部门范围及完整额度内容。</p><dl class="confirm-details"><dt>业务页面</dt><dd>${names[version]}</dd><dt>部门范围</dt><dd>${isCompanyScope(departmentsSelected)?'全公司 · ':''}${departmentsSelected.length} 个部门<ul class="scope-list">${departmentsSelected.map(id=>`<li>${esc(deptPath(id))}</li>`).join('')}</ul></dd><dt>生图模型</dt><dd>${esc(providerName(model))}</dd><dt>预计命中</dt><dd>${rows.length} 条配置（含 ${rows.filter(r=>!r.enabled).length} 条停用配置，已去重）</dd></dl><pre class="confirm-quota">${esc(quotaText(quota,true))}</pre><div class="hint">以本次部门范围为准；覆盖完整 quota，不改变启停状态，不新增人员配置。</div>`,()=>{const current=batchMatches();if(current.map(r=>r.id).sort().join(',')!==rows.map(r=>r.id).sort().join(',')){hideConfirm();previewBatch();error('更新范围已变化，请重新确认。');return;}let modified=0;for(const r of current){if(quotaSignature(r.quota)!==quotaSignature(quota)){r.quota=quota.map(pair=>[...pair]);r.updated=now();modified++;}}hideConfirm(false);closeDrawer(false);page=1;highlightIds=new Set(current.map(r=>r.id));renderList();showResult(`批量更新完成：${scope} · ${providerName(model)}。匹配 ${current.length} 条，实际修改 ${modified} 条${current.length>modified?`（${current.length-modified} 条额度相同）`:''}；启停状态保持不变。`,{kind:'batch',model,ids:current.map(r=>r.id),users:[...new Set(current.map(r=>r.userId))]});$('#resultAction').focus();toast('批量更新完成，仅在当前演示中生效。');});
     }catch(e){error(e.message);}}
-  function deleteRecord(r){showConfirm('删除配置',`<p class="modal-desc">确认删除「${esc(r.userName)}」的 ${esc(providerName(r.provider))} 配置？<br>仅删除当前页面这条用户模型配置，删除后不可恢复。</p>`,()=>{db[version]=db[version].filter(x=>x.id!==r.id);hideConfirm(false);renderList();$('#btnAdd').focus();toast('配置已删除（仅当前演示）');},'确认删除');}
-  $('#qProvider').innerHTML=options();queryDept=departmentPicker('#qDepartment','qDepartmentLabel','全部部门');
-  $('#searchForm').onsubmit=e=>{e.preventDefault();filters={uid:$('#qUserId').value.trim(),name:$('#qUserName').value.trim(),provider:$('#qProvider').value,enabled:$('#qEnabled').value,dept:queryDept.get(),children:$('#qChildren').checked};page=1;renderList();};
-  $('#btnResetFilter').onclick=resetFilters;$('#btnAdd').onclick=()=>openForm();$('#btnBatch').onclick=openBatch;$('#closeResult').onclick=()=>$('#resultBanner').hidden=true;
-  $$('[data-version]').forEach(b=>b.onclick=()=>{version=b.dataset.version;$$('[data-version]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-current',x===b?'page':'false');});$('#pageTitle').textContent=names[version];pageSize=20;$('#pageSize').value='20';$('#resultBanner').hidden=true;resetFilters();});
-  $('#pageSize').onchange=e=>{pageSize=Number(e.target.value);page=1;renderList();};$('#prevPage').onclick=()=>{page--;renderList();};$('#nextPage').onclick=()=>{page++;renderList();};
-  $('#tableBody').onclick=e=>{const b=e.target.closest('[data-action]');if(!b)return;const r=db[version].find(r=>r.id===Number(b.dataset.id));if(!r)return;if(b.dataset.action==='view')openView(r);if(b.dataset.action==='edit')openForm(r);if(b.dataset.action==='delete')deleteRecord(r);};
+  function deleteRecord(r){showConfirm('删除配置',`<p class="modal-desc">确认删除「${esc(r.userName)}」的 ${esc(providerName(r.provider))} 配置？<br>仅删除当前页面这条用户模型配置，删除后不可恢复。</p>`,()=>{db[version]=db[version].filter(x=>x.id!==r.id);hideConfirm(false);highlightIds.clear();renderList();showResult(`已删除 ${r.userName} · ${providerName(r.provider)} 的配置，仅影响当前业务页面。`,null);$('#btnAdd').focus();toast('配置已删除，仅在当前演示中生效。');},'确认删除');}
+
+  $('#qProvider').innerHTML=options();queryUsers=organizationPicker('#qUsers','qUsersLabel','people');
+  $('#searchForm').onsubmit=e=>{
+    e.preventDefault();if($('#btnSearch').disabled)return;
+    const next={uid:$('#qUserId').value.trim(),users:queryUsers.get(),provider:$('#qProvider').value,enabled:$('#qEnabled').value},token=++queryToken;
+    queryUsers.close();$('#btnSearch').disabled=true;$('#btnSearch').textContent='搜索中…';$('#searchForm').inert=true;
+    setTimeout(()=>{if(token!==queryToken)return;highlightIds.clear();applyListScope(next);$('#btnSearch').focus();},300);
+  };
+  $('#btnResetFilter').onclick=resetFilters;$('#btnAdd').onclick=()=>openForm();$('#btnBatch').onclick=openBatch;
+  $('#resultAction').onclick=showResultScope;$('#closeResult').onclick=()=>{$('#resultBanner').hidden=true;resultContext=null;};
+  $$('[data-view]').forEach(b=>b.onclick=()=>{
+    if(pageView===b.dataset.view)return;pageView=b.dataset.view;queryToken++;closeRowMenu();queryUsers.close();
+    $$('[data-view]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b));});
+    $('#changeOverview').hidden=pageView!=='overview';$('#configurationPage').hidden=pageView==='overview';
+    if(pageView==='overview')return;version=pageView;
+    $('#pageTitle').textContent=names[version];pageSize=20;$('#pageSize').value='20';$('#resultBanner').hidden=true;resultContext=null;resetFilters();
+  });
+  function goToPage(value){const n=Number(value);if(!Number.isFinite(n))return;const next=Math.max(1,Math.min(Math.trunc(n),Math.max(1,Math.ceil(filteredRows().length/pageSize))));if(next!==page){page=next;renderList();}}
+  function jumpPage(){const input=$('#pageJump'),value=input.value.trim();if(!value)return;if(/^\d+$/.test(value))goToPage(value);input.value='';}
+  $('#pageSize').onchange=e=>{pageSize=Number(e.target.value);page=1;renderList();};$('#prevPage').onclick=()=>goToPage(page-1);$('#nextPage').onclick=()=>goToPage(page+1);
+  $('#pageNumbers').onclick=e=>{const target=e.target.closest('[data-page]');if(target)goToPage(target.dataset.page);};
+  $('#pageJump').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();jumpPage();}};$('#pageJump').onblur=jumpPage;
+  $('#tableBody').onclick=e=>{if(e.target.closest('[data-reset-empty]')){resetFilters();return;}const trigger=e.target.closest('[data-row-menu]');if(!trigger)return;const r=db[version].find(r=>r.id===Number(trigger.dataset.rowMenu));if(r)openRowMenu(trigger,r);};
+  $('#rowMenu').onclick=e=>{const b=e.target.closest('[data-action]');if(!b||!menuRow)return;const r=menuRow,trigger=menuTrigger;closeRowMenu();trigger?.focus();if(b.dataset.action==='view')openView(r);if(b.dataset.action==='edit')openForm(r);if(b.dataset.action==='delete')deleteRecord(r);};
+  $('#rowMenu').onkeydown=e=>{const items=Array.from($('#rowMenu').querySelectorAll('button')),current=items.indexOf(document.activeElement);if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();items[e.key==='Home'?0:e.key==='End'?items.length-1:(current+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus();}};
   $('#closeDrawer').onclick=()=>closeDrawer();$('#cancelDrawer').onclick=()=>closeDrawer();$('#drawerMask').onclick=()=>closeDrawer();
-  $('#submitDrawer').onclick=()=>{if(drawerMode==='view')openForm(editing);else if(drawerMode==='batch')confirmBatch();else saveForm();};
-  $('#cancelConfirm').onclick=()=>hideConfirm();$('#confirmMask').onclick=()=>hideConfirm();$('#acceptConfirm').onclick=()=>{if(busy||!onConfirm)return;busy=true;$('#acceptConfirm').disabled=true;$('#acceptConfirm').textContent='处理中…';const action=onConfirm;setTimeout(()=>{busy=false;action();},220);};
-  document.addEventListener('click',e=>{$$('details[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});});
+  $('#submitDrawer').onclick=()=>{if(busy)return;if(drawerMode==='view')openForm(editing);else if(drawerMode==='batch')confirmBatch();else saveForm();};
+  $('#cancelConfirm').onclick=()=>hideConfirm();$('#confirmMask').onclick=()=>hideConfirm();
+  $('#acceptConfirm').onclick=()=>{if(busy||!onConfirm)return;busy=true;$('#acceptConfirm').disabled=true;$('#cancelConfirm').disabled=true;$('#acceptConfirm').textContent='处理中…';const action=onConfirm;setTimeout(()=>{busy=false;$('#cancelConfirm').disabled=false;action();},350);};
+  document.addEventListener('click',e=>{if(!e.target.closest('#rowMenu')&&!e.target.closest('[data-row-menu]'))closeRowMenu();const path=e.composedPath();$$('.dept-picker[open]').forEach(d=>{if(!path.includes(d))d.open=false;});});
+  window.addEventListener('resize',()=>closeRowMenu());document.querySelector('.table-wrap').addEventListener('scroll',()=>closeRowMenu());
   document.addEventListener('keydown',e=>{
     const modal=$('#confirmModal').classList.contains('show'),drawer=$('#drawer').classList.contains('show');
-    if(e.key==='Escape'){const details=$$('details[open]');if(details.length){details.forEach(d=>d.open=false);return;}if(modal)hideConfirm();else if(drawer)closeDrawer();}
-    if(e.key==='Tab'&&(modal||drawer)){const panel=modal?$('#confirmModal'):$('#drawer');const focusable=Array.from(panel.querySelectorAll('button,input,select,textarea,summary,a[href]')).filter(el=>!el.disabled&&el.getClientRects().length&&!el.closest('[hidden]')&&(!el.closest('details')||el.tagName==='SUMMARY'||el.closest('details').open));const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+    if(e.key==='Escape'){
+      e.preventDefault();if(modal){hideConfirm();return;}
+      if(drawer){const picker=$('#drawer .dept-picker[open]');if(picker){picker.open=false;picker.querySelector('summary').focus();}else closeDrawer();return;}
+      if(!$('#rowMenu').hidden){closeRowMenu(true);return;}const picker=$('.dept-picker[open]');if(picker){picker.open=false;picker.querySelector('summary').focus();}
+    }
+    if(e.key==='Tab'&&!modal&&!drawer&&!$('#rowMenu').hidden)closeRowMenu();
+    if(e.key==='Tab'&&(modal||drawer)){
+      const panel=modal?$('#confirmModal'):$('#drawer');
+      const focusable=Array.from(panel.querySelectorAll('button,input,select,textarea,summary,a[href]')).filter(el=>!el.disabled&&el.getClientRects().length&&!el.closest('[hidden]')&&!el.closest('[inert]')&&(!el.closest('details')||el.tagName==='SUMMARY'||el.closest('details').open));
+      const first=focusable[0],last=focusable.at(-1);if(!first){e.preventDefault();return;}
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
   });
+
   renderList();
 })();
+
 </script>
 </body>
 </html>
