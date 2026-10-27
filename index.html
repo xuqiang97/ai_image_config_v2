@@ -192,6 +192,7 @@ aplus：标普A+图额度</div>
   const sampleQuota=()=>[['total','1000'],['scene','3'],['closeUpWhite','0'],['closeUp','2'],['sellPoint','2'],['aplus','7']];
   function record(id,uid,model,enabled,quota){return {id,userId:uid,userName:user(uid).name,provider:model,enabled,quota:quota||sampleQuota(),created:'2026-10-20 09:00:00',updated:`2026-10-22 10:${String(30-id%20).padStart(2,'0')}:00`};}
   const db={operation:[record(101,'9101','1',true),record(102,'9102','1',false,[['total','500'],['scene','2']]),record(103,'9101','2',true,[['total','60']]),record(104,'9103','1',true),record(105,'9104','1',true),record(106,'9105','1',true),record(107,'9106','1',false),record(108,'9107','3',false,[['total','16']])],gen:[record(201,'8101','1',true),record(202,'8102','1',false,[['total','200']]),record(203,'8103','1',true),record(204,'8101','2',true,[['total','60']]),record(205,'8104','1',true)]};
+  let nextRecordId=Math.max(0,...Object.values(db).flat().map(r=>r.id))+1;
   let pageView='overview',version='operation',filters={},page=1,pageSize=20,queryUsers,drawerMode='',editing=null,returnFocus=null,modalFocus=null,onConfirm=null,busy=false,editor,batchDept,menuRow=null,menuTrigger=null,resultContext=null,highlightIds=new Set(),queryToken=0;
   const now=()=>new Date().toLocaleString('sv-SE');
   const toast=message=>{const n=document.createElement('div');n.className='toast';n.textContent=message;$('#toastWrap').append(n);setTimeout(()=>n.remove(),4000);};
@@ -350,8 +351,8 @@ aplus：标普A+图额度</div>
       const quota=editor.get(),target=editing,scopeVersion=version;setDrawerBusy(true);$('#submitDrawer').textContent='提交中…';
       setTimeout(()=>{
         let saved=target;
-        if(saved){saved.quota=quota.map(p=>[...p]);saved.enabled=enabled;saved.updated=now();}
-        else{saved={id:Math.max(0,...Object.values(db).flat().map(r=>r.id))+1,userId:uid,userName:name,provider:model,enabled,quota:quota.map(p=>[...p]),created:now(),updated:now()};db[scopeVersion].push(saved);}
+        if(saved){if(quotaSignature(saved.quota)!==quotaSignature(quota)||saved.enabled!==enabled){saved.quota=quota.map(p=>[...p]);saved.enabled=enabled;saved.updated=now();}}
+        else{saved={id:nextRecordId++,userId:uid,userName:name,provider:model,enabled,quota:quota.map(p=>[...p]),created:now(),updated:now()};db[scopeVersion].push(saved);}
         setDrawerBusy(false);closeDrawer(false);page=1;highlightIds=new Set([saved.id]);renderList();
         const visible=filteredRows().some(r=>r.id===saved.id);
         showResult(`已保存 ${saved.userName} · ${providerName(saved.provider)} 的配置。${visible?'': '当前筛选条件未包含此配置，可在列表中查看。'}`,{kind:'record',id:saved.id,uid:saved.userId,model:saved.provider});
@@ -378,7 +379,7 @@ aplus：标普A+图额度</div>
       },350);
     }catch(e){error(e.message);}
   }
-  function deleteRecord(r){showConfirm('删除配置',`<p class="modal-desc">确认删除「${esc(r.userName)}」的 ${esc(providerName(r.provider))} 配置？<br>仅删除当前页面这条用户模型配置，删除后不可恢复。</p>`,()=>{db[version]=db[version].filter(x=>x.id!==r.id);hideConfirm(false);highlightIds.clear();renderList();showResult(`已删除 ${r.userName} · ${providerName(r.provider)} 的配置，仅影响当前业务页面。`,null);$('#btnAdd').focus();toast('配置已删除，仅在当前演示中生效。');},'确认删除');}
+  function deleteRecord(r){showConfirm('删除配置',`<p class="modal-desc">确认删除「${esc(r.userName)}」的「${esc(providerName(r.provider))}」配置？<br>删除后，该用户将无法通过此配置发起新任务，已提交任务不受影响。</p>`,()=>{db[version]=db[version].filter(x=>x.id!==r.id);hideConfirm(false);highlightIds.clear();renderList();showResult(`已删除 ${r.userName} · ${providerName(r.provider)} 的配置，仅影响当前业务页面。`,null);$('#btnAdd').focus();toast('配置已删除，仅在当前演示中生效。');},'确认删除');}
 
   const quotaHelp=$('#quotaHelp'),quotaTooltip=$('#quotaTooltip'),quotaHelpText=quotaTooltip.textContent;let quotaHelpTimer;
   function hideQuotaHelp(){clearTimeout(quotaHelpTimer);quotaTooltip.hidden=true;}
@@ -436,7 +437,7 @@ aplus：标普A+图额度</div>
       if(drawer){const picker=$('#drawer .dept-picker[open]');if(picker){picker.open=false;picker.querySelector('summary').focus();}else closeDrawer();return;}
       if(!$('#rowMenu').hidden){closeRowMenu(true);return;}const picker=$('.dept-picker[open]');if(picker){picker.open=false;picker.querySelector('summary').focus();}
     }
-    if(e.key==='Tab'&&!modal&&!drawer&&!$('#rowMenu').hidden)closeRowMenu();
+    if(e.key==='Tab'&&!modal&&!drawer&&!$('#rowMenu').hidden)closeRowMenu(true);
     if(e.key==='Tab'&&(modal||drawer)){
       const panel=modal?$('#confirmModal'):$('#drawer');
       const focusable=Array.from(panel.querySelectorAll('button,input,select,textarea,summary,a[href]')).filter(el=>!el.disabled&&el.getClientRects().length&&!el.closest('[hidden]')&&!el.closest('[inert]')&&(!el.closest('details')||el.tagName==='SUMMARY'||el.closest('details').open));
